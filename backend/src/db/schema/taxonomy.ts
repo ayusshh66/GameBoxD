@@ -91,3 +91,32 @@ export const gameGenres = pgTable(
     ),
   ],
 );
+
+export const gameTags = pgTable(
+  "game_tags",
+  {
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    tagId: uuid("tag_id")
+      .notNull()
+      .references(() => tags.id, {
+        onDelete: "cascade",
+      }),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.gameId,
+        table.tagId,
+      ],
+    }),
+
+    index("game_tags_tag_id_idx").on(
+      table.tagId,
+    ),
+  ],
+);
