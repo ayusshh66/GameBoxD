@@ -166,3 +166,14 @@ export const gameGenresRelations = relations(gameGenres, ({one}) => ({
         references : [games.id],
     })
 }))
+
+export const tagsRelations = relations(tags,({many}) => ({
+    gameTags: many(gameTags),
+}))
+
+export const gameTagsRelations = relations(gameTags, ({one}) => ({
+    tags : one(tags,{
+        fields : [gameTags.tagId],
+        references : [tags.id],
+    })
+}))
