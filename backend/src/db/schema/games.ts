@@ -99,7 +99,7 @@ export const games = pgTable(
 
     metacriticScore: integer("metacritic_score"),
 
-    averageRating: integer("average_rating"),
+    averageRating: numeric("average_rating"),
 
     ratingsCount: integer("ratings_count")
       .notNull()
@@ -137,13 +137,13 @@ export const games = pgTable(
   ],
 );
 
-export const gamesRelations = relations(games, ({ many }) => ({
-  sources: many(gameSources),
-}));
+export const gamesRelations = relations(games,({many}) =>({
+    sources : many(gameSources)
+}))
 
-export const gameSourcesRelations = relations(gameSources, ({ one }) => ({
-  game: one(games, {
-    fields: [gameSources.gameId],
-    references: [games.id],
-  }),
-}));
+export const gameSourcesRelations = relations(gameSources, ({one}) =>({
+    game : one(games,{
+        fields : [gameSources.gameId],
+        references : [games.id], 
+    })
+}))
