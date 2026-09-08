@@ -120,3 +120,32 @@ export const gameTags = pgTable(
     ),
   ],
 );
+
+export const gamePlatforms = pgTable(
+  "game_platforms",
+  {
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    platformId: uuid("platform_id")
+      .notNull()
+      .references(() => platforms.id, {
+        onDelete: "cascade",
+      }),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.gameId,
+        table.platformId,
+      ],
+    }),
+
+    index("game_platforms_platform_id_idx").on(
+      table.platformId,
+    ),
+  ],
+);
