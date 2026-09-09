@@ -6,6 +6,7 @@ import {
   index,
   date,
   text,
+  timestamp
 } from "drizzle-orm/pg-core";
 
 import { games } from "./games";
@@ -177,3 +178,43 @@ export const gameTagsRelations = relations(gameTags, ({one}) => ({
         references : [tags.id],
     })
 }))
+
+export const gameReleases = pgTable("game_releases", {
+    id: uuid("id").defaultRandom().primaryKey(), // unique id
+
+    gameId: uuid("game_id") // game id reference to games table id
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    platformId: uuid("platform_id") // platform id, if we delete a platform data then it will also be deleted
+      .notNull()
+      .references(() => platforms.id, {
+        onDelete: "cascade",
+      }),
+
+    releaseDate: date("release_date") // rlease date of the game
+      .notNull(),
+ 
+    region: varchar("region", { // region
+      length: 50,
+    }),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },(table) =>[
+    index("game_releases_date_idx").on(
+      table.releaseDate,
+    ),
+    index("game_releases_platform_idx").on(
+      table.platformId,
+    ),
+
+    index("game_releases_game_idx").on(
+      table.gameId,
+    ),
+  ])
