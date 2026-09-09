@@ -6,7 +6,8 @@ import {
   index,
   date,
   text,
-  timestamp
+  timestamp,
+  integer
 } from "drizzle-orm/pg-core";
 
 import { games } from "./games";
@@ -322,3 +323,70 @@ export const gamePublishers = pgTable(
     }),
   ],
 );
+
+export const gameScreenshots = pgTable(
+  "game_screenshots",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    imageUrl: text("image_url").notNull(),
+
+    width: integer("width"),
+
+    height: integer("height"),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("game_screenshots_game_idx").on(
+      table.gameId,
+    ),
+  ],
+);
+
+export const gameVideos = pgTable(
+  "game_videos",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    name: varchar("name", {
+      length: 255,
+    }),
+
+    videoUrl: text("video_url").notNull(),
+
+    thumbnailUrl: text("thumbnail_url"),
+
+    type: varchar("type", {
+      length: 50,
+    }),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("game_videos_game_idx").on(
+      table.gameId,
+    ),
+  ],
+);
+
