@@ -155,6 +155,7 @@ export const gamePlatforms = pgTable(
 
 export const platformsRelations = relations(platforms, ({many}) =>({ // we use ({}) when we dont wantt o use retrun, if we use {} then we must use return
   gamePlatforms : many(gamePlatforms),
+  gameReleases : many(gameReleases),
 }))
 
 export const gamePlatformsRelations = relations(gamePlatforms, ({one}) =>({
@@ -247,6 +248,18 @@ export const gameReleases = pgTable("game_releases", {
       table.gameId,
     ),
   ])
+
+export const gameReleasesRelations = relations(gameReleases, ({one}) =>({
+  platforms : one(platforms, {
+    fields : [gameReleases.platformId],
+    references : [platforms.id],
+  }),
+  games : one(games, {
+    fields : [gameReleases.gameId],
+    references : [games.id],
+  })
+}))
+
 
 export const developers = pgTable(
   "developers",
