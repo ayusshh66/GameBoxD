@@ -371,6 +371,17 @@ export const gamePublishers = pgTable(
   ],
 );
 
+export const publishersRelations = relations(publishers, ({many}) => ({
+  gamePublishers : many(gamePublishers),
+}))
+
+export const gamePublishersRelations = relations(gamePublishers, ({one}) =>({
+  publishers : one(publishers, {
+    fields : [gamePublishers.publisherId],
+    references : [publishers.id],
+  })
+}))
+
 export const gameScreenshots = pgTable(
   "game_screenshots",
   {
