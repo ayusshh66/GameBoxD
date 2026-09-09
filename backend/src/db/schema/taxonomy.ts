@@ -274,3 +274,51 @@ export const gameDevelopers = pgTable(
     }),
   ],
 );
+
+export const publishers = pgTable(
+  "publishers",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    name: varchar("name", {
+      length: 255,
+    }).notNull(),
+
+    slug: varchar("slug", {
+      length: 255,
+    })
+      .notNull()
+      .unique(),
+
+    description: text("description"),
+
+    logoUrl: text("logo_url"),
+
+    website: text("website"),
+  },
+);
+
+export const gamePublishers = pgTable(
+  "game_publishers",
+  {
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    publisherId: uuid("publisher_id")
+      .notNull()
+      .references(() => publishers.id, {
+        onDelete: "cascade",
+      }),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.gameId,
+        table.publisherId,
+      ],
+    }),
+  ],
+);
