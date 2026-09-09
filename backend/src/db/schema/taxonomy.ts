@@ -260,7 +260,6 @@ export const gameReleasesRelations = relations(gameReleases, ({one}) =>({
   })
 }))
 
-
 export const developers = pgTable(
   "developers",
   {
@@ -308,6 +307,21 @@ export const gameDevelopers = pgTable(
     }),
   ],
 );
+
+export const developersRelations = relations(developers, ({many}) => ({
+  gameDevelopers : many(gameDevelopers),
+}))
+
+export const gameDevelopersRelations = relations(gameDevelopers, ({one}) =>({
+  developers : one(developers, {
+    fields : [gameDevelopers.developerId],
+    references : [developers.id],
+  }),
+  games : one(games, {
+    fields : [gameDevelopers.gameId],
+    references : [games.id]
+  })
+}))
 
 export const publishers = pgTable(
   "publishers",
