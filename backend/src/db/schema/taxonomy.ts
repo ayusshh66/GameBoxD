@@ -206,7 +206,15 @@ export const gameReleases = pgTable("game_releases", {
     })
       .notNull()
       .defaultNow(),
-  },(table) =>[
+  },(table) =>[ 
+//     Object {...} (Labeled Form): You use this when every item needs a unique, specific name.
+
+// Columns need unique names: { name: varchar(), releaseDate: date() }
+
+// Array [...] (Checklist): You use this when you just want to pass a list of items to the database, and the order/names inside don't act as lookup keys.
+
+// Table constraints are just a list of rules: [ index_1, index_2, primaryKey_1 ]
+
     index("game_releases_date_idx").on(
       table.releaseDate,
     ),
@@ -218,3 +226,51 @@ export const gameReleases = pgTable("game_releases", {
       table.gameId,
     ),
   ])
+
+export const developers = pgTable(
+  "developers",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    name: varchar("name", {
+      length: 255,
+    }).notNull(),
+
+    slug: varchar("slug", {
+      length: 255,
+    })
+      .notNull()
+      .unique(),
+
+    description: text("description"),
+
+    logoUrl: text("logo_url"),
+
+    website: text("website"),
+  },
+);
+
+export const gameDevelopers = pgTable(
+  "game_developers",
+  {
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    developerId: uuid("developer_id")
+      .notNull()
+      .references(() => developers.id, {
+        onDelete: "cascade",
+      }),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.gameId,
+        table.developerId,
+      ],
+    }),
+  ],
+);
