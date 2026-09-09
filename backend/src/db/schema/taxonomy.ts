@@ -448,3 +448,17 @@ export const gameVideos = pgTable(
   ],
 );
 
+export const gameScreenshotsRelations = relations(gameScreenshots, ({one}) => ({
+  games : one(games,{
+    fields : [gameScreenshots.gameId],
+    references : [games.id],
+  })
+}))
+
+export const gameVideosRelations = relations(gameVideos, ({one}) =>({
+  games : one(games,{
+    fields : [gameVideos.gameId],
+    references : [games.id]
+  })
+}))
+
