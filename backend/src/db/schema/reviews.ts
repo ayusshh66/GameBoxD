@@ -64,3 +64,57 @@ export const userGameRatings = pgTable(
     }),
   ],
 );
+
+export const reviews = pgTable(
+  "reviews",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    content: text("content").notNull(),
+
+    isSpoiler: boolean("is_spoiler")
+      .notNull()
+      .default(false),
+
+    isEdited: boolean("is_edited")
+      .notNull()
+      .default(false),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("reviews_game_created_idx").on(
+      table.gameId,
+      table.createdAt,
+    ),
+
+    index("reviews_user_created_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
+  ],
+);
+
