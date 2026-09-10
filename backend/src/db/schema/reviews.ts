@@ -192,3 +192,34 @@ export const userWishlist = pgTable(
     ),
   ],
 );
+
+export const userFavorites = pgTable(
+  "user_favorites",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.userId,
+        table.gameId,
+      ],
+    }),
+  ],
+);
