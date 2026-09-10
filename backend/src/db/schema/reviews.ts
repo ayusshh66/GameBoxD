@@ -118,3 +118,37 @@ export const reviews = pgTable(
   ],
 );
 
+export const reviewLikes = pgTable(
+  "review_likes",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+    reviewId: uuid("review_id")
+      .notNull()
+      .references(() => reviews.id, {
+        onDelete: "cascade",
+      }),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.userId,
+        table.reviewId,
+      ],
+    }),
+
+    index("review_likes_review_idx").on(
+      table.reviewId,
+    ),
+  ],
+);
