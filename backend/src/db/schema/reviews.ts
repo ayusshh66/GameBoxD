@@ -152,3 +152,43 @@ export const reviewLikes = pgTable(
     ),
   ],
 );
+
+export const userWishlist = pgTable(
+  "user_wishlist",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, {
+        onDelete: "cascade",
+      }),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.userId,
+        table.gameId,
+      ],
+    }),
+
+    index("wishlist_game_idx").on(
+      table.gameId,
+    ),
+
+    index("wishlist_user_created_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
+  ],
+);
