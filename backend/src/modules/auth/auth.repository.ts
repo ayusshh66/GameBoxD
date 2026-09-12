@@ -34,4 +34,26 @@ export const findUserById = async(id:string) =>{
     }
 }
 
+export const createUser = async(data : {
+    username : string,
+    email : string,
+    passwordHash : string,
+}) => {
+
+    try {
+
+        const [result] = await db.insert(users).values(data).returning({
+            id : users.id,
+            email : users.email,
+            username : users.username,
+        })
+
+        return result;
+        
+    } catch (error) {
+        console.error(`error in creating user ${error}`)
+        throw error
+    }
+
+}
 
