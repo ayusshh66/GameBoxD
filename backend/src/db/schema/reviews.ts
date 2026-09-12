@@ -15,7 +15,7 @@ import { games } from "./games";
 export const userGameRatings = pgTable(
   "user_game_ratings",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    // id: uuid("id").defaultRandom(),
 
     userId: uuid("user_id")
       .notNull()
