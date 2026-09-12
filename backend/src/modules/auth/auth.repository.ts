@@ -19,3 +19,19 @@ export const findUserByEmail = async(email:string) =>{
 
 }
 
+export const findUserById = async(id:string) =>{
+    try {
+
+        const user = await db.query.users.findFirst({
+            where : eq(users.id, id),
+        })
+
+        return user ?? null;
+        
+    } catch (error) {
+        console.error(`error in finding user by id ${error}`)
+        throw error
+    }
+}
+
+
