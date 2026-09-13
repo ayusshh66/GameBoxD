@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import { loginSchema, registerSchema } from "./auth.validation";
-import { loginUser, loginUser, registerUser } from "./auth.service";
+import { loginUser, registerUser } from "./auth.service";
 import { es } from "zod/v4/locales";
 
 
