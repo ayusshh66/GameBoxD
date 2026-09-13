@@ -9,7 +9,7 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is missing.");
 }
 
-export const register = async(username : string,
+export const registerUser = async(username : string,
     email : string,
     password : string,
 ) =>{
