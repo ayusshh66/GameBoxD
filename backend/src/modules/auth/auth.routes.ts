@@ -3,8 +3,10 @@ import { login, register } from "./auth.controller";
 import { authenticate, getMe, AuthRequest } from "./auth.middleware";
 
 
-const app = express.Router();
+const router = express.Router();
 
-app.post("/register", register);
-app.post("/login", login);
-app.get("/me", authenticate,getMe);
+router.post("/register", register);
+router.post("/login", login);
+router.get("/me", authenticate,getMe);
+
+export default router;
