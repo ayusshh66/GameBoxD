@@ -31,3 +31,22 @@
 > * **Surrogate `id` + Composite `unique()**` = Used for **entities** (tables that have their own data, endpoints, or child tables referencing them).
 > 
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ENDS HERE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+
+#BROWSER COOKIES
+
+A cookie (also known as a web cookie or browser cookie) is a small piece of data a server sends to a user's web browser. The browser may store cookies, create new cookies, modify existing ones, and send them back to the same server with later requests.
+
+Cookies are mainly used for three purposes:-
+Session management: User sign-in status, shopping cart contents, game scores, or any other user session-related details that the server needs to remember.
+Personalization: User preferences such as display language and UI theme.
+Tracking: Recording and analyzing user behavior.
+
+### Global Error Handling (`next(error)`)
+* Passing caught exceptions to `next(error)` delegates error processing to a centralized Express error-handling middleware (`app.use((err, req, res, next) => ...)`).
+* Eliminates boilerplate HTTP status handling across individual controller methods, standardizing response signatures for validation (`ZodError`), authorization, and database failures.
+
+Without next(error): Every controller has to check if error is a Zod error, a DB error, or an auth error, and manually set .status(400), .status(401), or .status(500).
+
+With next(error): Your controller code stays completely clean—just next(error). The centralized middleware handles status code mapping and formatting in one single place for your entire API.
+
