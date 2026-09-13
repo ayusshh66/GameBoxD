@@ -40,3 +40,31 @@ export const authenticate = async(req:AuthRequest, res:Response, next : NextFunc
 }
 
 
+export const getMe = async(req:AuthRequest, res:Response, next: NextFunction) =>{
+
+    try {
+
+        const existingUser = await findUserById(req.userId!);
+
+        if(!existingUser){
+            return res.status(400).json({
+                success : false,
+                message : "user not found",
+            })
+        }
+
+        return res.status(200).json({
+            success : true,
+            message : "got the user",
+            data : {
+                username : existingUser.username,
+                id : existingUser.id,
+                email : existingUser.email,
+            }
+        })
+
+    } catch (error) {
+        next(error);
+    }
+
+}
