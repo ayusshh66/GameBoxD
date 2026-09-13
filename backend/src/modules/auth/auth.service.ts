@@ -4,6 +4,7 @@ import { db, users } from "../../db";
 import {findUserByEmail, findUserById, createUser} from "./auth.repository"
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is missing.");
 }
@@ -66,4 +67,18 @@ export const loginUser = async(email : string , password : string) =>{
         throw error;
     }
 }
+
+export const getUserById = async(id : string) =>{
+
+    try {
+
+        return await findUserById(id);
+        
+    } catch (error) {
+        console.error(`error in gettung user by id`)
+        throw new Error(`Error in getting user by id ${error}`)
+    }
+
+}
+
 
