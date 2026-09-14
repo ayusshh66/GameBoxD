@@ -52,3 +52,11 @@ export const getGame = async(req: Request <{slug:string}>, res : Response, next:
 
 }
 
+export const latestGames = async(req:Request<{limit:number}>, res:Response, next:NextFunction) => {
+
+    const {limit} = req.params;
+
+    
+
+}
+
