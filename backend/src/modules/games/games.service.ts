@@ -1,9 +1,9 @@
 import { findAllGames, findGameBySlug } from "./games.repository"
 
 
-export const getAllGames = async() => {
+export const getAllGames = async(limit: number, offset:number) => {
 
-    return await findAllGames()
+    return await findAllGames(limit, offset);
 
 }
 

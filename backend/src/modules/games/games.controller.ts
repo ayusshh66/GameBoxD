@@ -2,11 +2,16 @@ import express ,{ NextFunction, Request, Response} from "express";
 import { getAllGames, getGameBySlug } from "./games.service";
 
 
-export const getGames = async(req: Request, res:Response, next:NextFunction) => {
+export const getGames = async(req: Request<{
+    limit : number,
+    offset : number,
+}>, res:Response, next:NextFunction) => {
     
     try {
 
-        const result = await getAllGames();
+        const {limit, offset} = req.params;
+
+        const result = await getAllGames(limit, offset);
 
         return res.status(200).json({
             success : true,
