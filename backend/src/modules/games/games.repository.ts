@@ -1,12 +1,18 @@
 import { db, games } from "../../db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 
-export const findAllGames = async() => {
+export const findAllGames = async(limit : number,
+    offset: number
+) => {
 
     try {
 
-        const result = await db.query.games.findMany();
+        const result = await db.query.games.findMany({
+            limit : limit,
+            offset : offset,
+            orderBy: (games, {desc}) => [desc(games.createdAt)],
+        });
         return result;
         
     } catch (error) {
