@@ -16,3 +16,19 @@ export const findAllGames = async() => {
 
 }
 
+export const findGameBySlug = async(slug : string) =>{
+
+    try {
+
+        const result = await db.query.games.findFirst({
+            where : eq(games.slug, slug),
+        })
+
+        return result;
+        
+    } catch (error) {
+        console.error("error in finding games my slug",error)
+        throw error;
+    }
+
+}
