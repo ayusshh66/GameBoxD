@@ -1,5 +1,5 @@
 import { db, games } from "../../db";
-import { desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 
 
 export const findAllGames = async(limit : number,
@@ -53,6 +53,25 @@ export const findLatestGames = async(limit : number) => {
         
     } catch (error) {
         console.error("error in fetching latest game", error);
+        throw error;
+    }
+
+}
+
+export const upcominigGames = async(limit:number) => {
+
+    try {
+
+        const result = await db.query.games.findMany({
+            where : (games, {eq}) => (eq(games.status, "upcoming")),
+            limit : limit,
+            orderBy : (games, {asc}) => [(asc(games.releaseDate))]
+        })
+
+        return result;
+        
+    } catch (error) {
+        console.error("error in finding upcoming games", error);
         throw error;
     }
 
