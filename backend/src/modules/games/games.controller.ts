@@ -21,3 +21,29 @@ export const getGames = async(req: Request, res:Response, next:NextFunction) => 
 
 }
 
+export const getGame = async(req: Request <{slug:string}>, res : Response, next:NextFunction) => {
+
+    try {
+
+        const {slug} = req.params;
+
+        const result = await getGameBySlug(slug);
+
+        if(!result){
+            return res.status(400).json({
+                success : false,
+                message : "game not found",
+            })
+        }
+
+        return res.status(200).json({
+            success : true,
+            message : "game found",
+            data : result,
+        })
+        
+    } catch (error) {
+        next(error);
+    }
+
+}
