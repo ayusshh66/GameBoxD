@@ -1,5 +1,5 @@
 import { db, games } from "../../db";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, ilike } from "drizzle-orm";
 
 
 export const findAllGames = async(limit : number,
@@ -91,6 +91,24 @@ export const findTopGames = async(limit:number) => {
         
     } catch (error) {
         console.error("error in fetching top games", error);
+        throw error;
+    }
+
+}
+
+export const searchGames = async(query: string, limit:number, offset:number) => {
+
+    try {
+
+        const reuslt = await db.query.games.findMany({
+            where : (games, {ilike}) => (ilike(games.name, `%${query}%`)),
+            limit,
+            offset,
+            orderBy : (games, {desc}) => (desc(games.releaseDate)),
+        })
+        
+    } catch (error) {
+        console.error("error in fetching search games results", error);
         throw error;
     }
 
