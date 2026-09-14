@@ -58,7 +58,7 @@ export const findLatestGames = async(limit : number) => {
 
 }
 
-export const upcominigGames = async(limit:number) => {
+export const findUpcominigGames = async(limit:number) => {
 
     try {
 
@@ -72,6 +72,25 @@ export const upcominigGames = async(limit:number) => {
         
     } catch (error) {
         console.error("error in finding upcoming games", error);
+        throw error;
+    }
+
+}
+
+export const findTopGames = async(limit:number) => {
+
+    try {
+
+        const result = await db.query.games.findMany({
+            where : (games, {eq}) => (eq(games.status, "released")),
+            limit,
+            orderBy : (games, {desc}) => [(desc(games.averageRating)), desc(games.ratingsCount)]
+        })
+
+        return result;
+        
+    } catch (error) {
+        console.error("error in fetching top games", error);
         throw error;
     }
 
