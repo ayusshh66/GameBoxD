@@ -2,6 +2,7 @@ import express, {Request, Response} from "express";
 import cookieParse from "cookie-parser";
 import cors from 'cors'
 import authRouter from "./src/modules/auth/auth.routes"
+import gameRouter from "./src/modules/games/games.routes"
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -18,6 +19,7 @@ app.get("/", async(req: Request, res: Response) => {
 })
 
 app.use("/api/auth", authRouter)
+app.use("/api/games",gameRouter)
 
 app.listen(PORT, () =>{
 

@@ -2,7 +2,6 @@ import express ,{ NextFunction, Request, Response} from "express";
 import { getAllGames, getGameBySlug } from "./games.service";
 
 
-
 export const getGames = async(req: Request, res:Response, next:NextFunction) => {
     
     try {
@@ -47,3 +46,4 @@ export const getGame = async(req: Request <{slug:string}>, res : Response, next:
     }
 
 }
+
