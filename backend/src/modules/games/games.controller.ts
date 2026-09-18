@@ -1,5 +1,5 @@
 import express ,{ NextFunction, Request, Response} from "express";
-import { getAllGames, getGameBySlug, getLatestGames, getUpcomingGames } from "./games.service";
+import { getAllGames, getGameBySlug, getLatestGames, getTopGames, getUpcomingGames } from "./games.service";
 
 
 export const getGames = async(req: Request<{
@@ -106,5 +106,34 @@ export const upcomingGames = async(req:Request<{limit : number}>, res: Response,
         console.error("error in fetching upcoming games", error)
         next(error)
     }
+}
+
+export const topGames = async(req:Request<{limit : number}>, res:Response, next:NextFunction) => {
+
+    try {
+
+        const limit = Math.min(Number(req.params.limit) || 20, 100);
+
+        const result = await getTopGames(limit);
+
+        if(!result){
+            return res.status(400).json({
+                success : false,
+                message : "unable to find top game",
+            })
+        }
+
+        return res.status(200).json({
+            success : true,
+            message : "successfully found the top game",
+            data : result,
+            limit,
+        })
+        
+    } catch (error) {
+        console.error("error in finding top game", error);
+        next(error)
+    }
+
 }
 
