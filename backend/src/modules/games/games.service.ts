@@ -1,7 +1,9 @@
 import { findAllGames, findGameBySlug, findLatestGames, findTopGames, findUpcominigGames, searchGames } from "./games.repository"
 
 
-export const getAllGames = async(limit: number, offset:number) => {
+export const getAllGames = async(limit: number, page:number) => {
+
+    const offset = (page-1)*limit
 
     return await findAllGames(limit, offset);
 
@@ -31,7 +33,9 @@ export const getTopGames = async(limit:number) => {
 
 }
 
-export const getSearchTopGames = async(query:string, limit:number, offset:number) => {
+export const getSearchTopGames = async(query:string, limit:number, page:number) => {
+
+    const offset = (page-1)*limit
 
     return await searchGames(query,limit,offset);
 
