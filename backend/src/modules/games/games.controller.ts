@@ -1,5 +1,5 @@
 import express ,{ NextFunction, Request, Response} from "express";
-import { getAllGames, getGameBySlug } from "./games.service";
+import { getAllGames, getGameBySlug, getLatestGames } from "./games.service";
 
 
 export const getGames = async(req: Request<{
@@ -56,7 +56,21 @@ export const latestGames = async(req:Request<{limit:number}>, res:Response, next
 
     const {limit} = req.params;
 
-    
+    const result = await getLatestGames(limit);
+
+    if(!result){
+        return res.status(400).json({
+            success : false,
+            message : "no latest game found",
+        })
+    }
+
+    return res.status(200).json({
+        success : true,
+        message : "Successfully found the latest game",
+        data : result,
+    })
+
 
 }
 
