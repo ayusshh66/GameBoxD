@@ -1,10 +1,26 @@
-import express from "express";
-import { getGame, getGames } from "./games.controller";
+import { Router } from "express";
 
-const router = express.Router();
+import {
+  getGames,
+  getGame,
+  latestGames,
+  upcomingGames,
+  topGames,
+  searchTopGames,
+} from "./games.controller";
 
-router.get("/games", getGames);
-router.get("/game/:slug", getGame);
+const router = Router();
+
+router.get("/", getGames);
+
+router.get("/latest", latestGames);
+
+router.get("/upcoming", upcomingGames);
+
+router.get("/top", topGames);
+
+router.get("/search", searchTopGames);
+
+router.get("/:slug", getGame);
 
 export default router;
-

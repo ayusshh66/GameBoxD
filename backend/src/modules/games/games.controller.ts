@@ -79,7 +79,7 @@ export const latestGames = async(req:Request<{limit:number}>, res:Response, next
     })
 }
 
-export const upcomingGames = async(req:Request<{limit : number}>, res: Response, :next:NextFunction) => {
+export const upcomingGames = async(req:Request<{limit : number}>, res: Response, next:NextFunction) => {
 
     try {
 
@@ -140,7 +140,15 @@ export const topGames = async(req:Request<{limit : number}>, res:Response, next:
 
 export const searchTopGames = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const query = String(req.query.query || "");
+    const query = String(req.query.q || "").trim();
+
+    if (!query) {
+      res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+      return;
+    }
     const limit = Math.min(Number(req.query.limit) || 20, 100);
     const page = Number(req.query.page) || 1;
 
@@ -158,6 +166,7 @@ export const searchTopGames = async (req: Request, res: Response, next: NextFunc
       data: result,
       limit,
       page,
+      query,    
     });
   } catch (error) {
     console.error("Error in getting searchTopGames:", error);
