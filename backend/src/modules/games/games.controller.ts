@@ -4,18 +4,21 @@ import { getAllGames, getGameBySlug, getLatestGames } from "./games.service";
 
 export const getGames = async(req: Request<{
     limit : number,
-    offset : number,
+    page : number,
 }>, res:Response, next:NextFunction) => {
     
     try {
 
-        const {limit, offset} = req.params;
+        const page = Number(req.params.page) || 20;
+        const limit = Math.min(Number(req.params.limit) || 20, 100);
 
-        const result = await getAllGames(limit, offset);
+        const result = await getAllGames(limit, page);
 
         return res.status(200).json({
             success : true,
             message : "game has been fetched successfully",
+            page,
+            limit,
             data : result,
         })
         
@@ -54,7 +57,10 @@ export const getGame = async(req: Request <{slug:string}>, res : Response, next:
 
 export const latestGames = async(req:Request<{limit:number}>, res:Response, next:NextFunction) => {
 
-    const {limit} = req.params;
+    const limit = Math.min(
+      Number(req.query.limit) || 20,
+      100
+    );
 
     const result = await getLatestGames(limit);
 
@@ -69,8 +75,7 @@ export const latestGames = async(req:Request<{limit:number}>, res:Response, next
         success : true,
         message : "Successfully found the latest game",
         data : result,
+        limit,
     })
-
-
 }
 
