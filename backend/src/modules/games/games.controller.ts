@@ -1,5 +1,5 @@
 import express ,{ NextFunction, Request, Response} from "express";
-import { getAllGames, getGameBySlug, getLatestGames, getTopGames, getUpcomingGames } from "./games.service";
+import { getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames } from "./games.service";
 
 
 export const getGames = async(req: Request<{
@@ -137,3 +137,30 @@ export const topGames = async(req:Request<{limit : number}>, res:Response, next:
 
 }
 
+
+export const searchTopGames = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const query = String(req.query.query || "");
+    const limit = Math.min(Number(req.query.limit) || 20, 100);
+    const page = Number(req.query.page) || 1;
+
+    const result = await getSearchTopGames(query, limit, page);
+
+    if (!result) {
+      return res.status(400).json({
+        success: false,
+        message: "Unable to find top search games",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+      limit,
+      page,
+    });
+  } catch (error) {
+    console.error("Error in getting searchTopGames:", error);
+    next(error);
+  }
+};

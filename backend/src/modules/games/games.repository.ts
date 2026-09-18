@@ -100,12 +100,14 @@ export const searchGames = async(query: string, limit:number, offset:number) => 
 
     try {
 
-        const reuslt = await db.query.games.findMany({
+        const result = await db.query.games.findMany({
             where : (games, {ilike}) => (ilike(games.name, `%${query}%`)),
             limit,
             offset,
             orderBy : (games, {desc}) => (desc(games.releaseDate)),
         })
+
+        return result;
         
     } catch (error) {
         console.error("error in fetching search games results", error);
