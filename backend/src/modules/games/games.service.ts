@@ -59,6 +59,7 @@ interface CreateGameInput {
 
 export const createGame = async(data:CreateGameInput) => {
 
+    // db.transaction = all or nothing
     return await db.transaction(async(tx) => {
 
         const [game] = await tx.insert(games).values({
@@ -75,7 +76,7 @@ export const createGame = async(data:CreateGameInput) => {
         if(data.tagIds.length>0){
             await tx.insert(gameTags).values(
                 data.tagIds.map((tagId) => ({
-                    gameId : game.id,
+                    gameId : game.id, // above game data that is inserted in games table
                     tagId: tagId
                 }))
             )
@@ -90,8 +91,16 @@ export const createGame = async(data:CreateGameInput) => {
             )
         }
 
+        if(data.genreIds.length>0){
+            await tx.insert(gameGenres).values(
+                data.genreIds.map((genreId) => ({
+                    gameId : game.id,
+                    genreId:genreId,
+                }))
+            )
+        }
 
-
+        return game;
     })
 
 }
