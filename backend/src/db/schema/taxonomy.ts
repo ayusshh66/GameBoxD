@@ -461,4 +461,3 @@ export const gameVideosRelations = relations(gameVideos, ({one}) =>({
     references : [games.id]
   })
 }))
-

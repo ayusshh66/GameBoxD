@@ -50,3 +50,6 @@ Without next(error): Every controller has to check if error is a Zod error, a DB
 
 With next(error): Your controller code stays completely clean—just next(error). The centralized middleware handles status code mapping and formatting in one single place for your entire API.
 
+#Query Short-Circuiting
+
+![alt text](image.png)
