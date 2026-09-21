@@ -23,4 +23,4 @@ router.get("/search", searchTopGames);
 
 router.get("/:slug", getGame);
 
-export default router;
+export default router;  
