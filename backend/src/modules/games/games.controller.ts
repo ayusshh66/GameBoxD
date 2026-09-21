@@ -1,5 +1,6 @@
 import express ,{ NextFunction, Request, Response} from "express";
-import { getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames } from "./games.service";
+import { createGame, getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames } from "./games.service";
+import { createGameSchema } from "./games.validation";
 
 
 export const getGames = async(req: Request<{
@@ -137,7 +138,6 @@ export const topGames = async(req:Request<{limit : number}>, res:Response, next:
 
 }
 
-
 export const searchTopGames = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const query = String(req.query.q || "").trim();
@@ -173,3 +173,31 @@ export const searchTopGames = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
+
+export const postGame = async(req:Request, res:Response, next:NextFunction) => {
+
+    try {
+
+        const result = await createGameSchema.safeParseAsync(req.body);
+
+        if(!result.success){
+            return res.status(400).json({
+                success:false,
+                message: "inavlid input"
+            })
+        }
+
+        const game = await createGame(result.data);
+
+        return res.status(200).json({
+            success : true,
+            message : "game created successfully!",
+            data:game
+        })
+        
+    } catch (error) {
+        console.error("error in creating new game", error)
+        next(error);
+    }
+
+}
