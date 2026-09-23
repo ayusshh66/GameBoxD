@@ -36,4 +36,44 @@ export const createGameSchema = z.object({
   platformIds: z.array(z.string().uuid()).default([]),
 });
 
-export const updateGameSchema = createGameSchema.partial();
+export const updateGameSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+
+  slug: z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .optional(),
+
+  description: z.string().optional(),
+
+  coverUrl: z.string().url().optional(),
+
+  backgroundUrl: z.string().url().optional(),
+
+  releaseDate: z.coerce.date().optional(),
+
+  status: z
+    .enum(["upcoming", "released", "cancelled"])
+    .optional(),
+
+  metacriticScore: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .optional(),
+
+  genreIds: z
+    .array(z.string().uuid())
+    .optional(),
+
+  platformIds: z
+    .array(z.string().uuid())
+    .optional(),
+
+  tagIds: z
+    .array(z.string().uuid())
+    .optional(),
+});
