@@ -1,6 +1,7 @@
 import express ,{ NextFunction, Request, Response} from "express";
-import { createGame, getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames, updateGame } from "./games.service";
+import { createGame, getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames, updateGame, deleteGame } from "./games.service";
 import { createGameSchema, updateGameSchema } from "./games.validation";
+import { db, games } from "../../db"
 
 
 export const getGames = async(req: Request<{
@@ -244,6 +245,34 @@ export const patchGame = async(req:Request<{gameId:string},any, any, any>, res:R
     } catch (error) {
         console.error("error in updating the game", error);
         next(error);
+    }
+
+}
+
+export const deletedGame = async(req:Request, res:Response, next:NextFunction) => {
+
+    try {
+
+        const {gameId} = req.params;
+
+        const deleted = await deleteGame(gameId as string);
+
+        if(!deleted){
+            return res.status(400).json({
+                success:false,
+                message: "game not found",
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:"game deleted successfully!",
+            data:deleted,
+        })
+        
+    } catch (error) {
+        console.error("error in deleting the game", error);
+        next(error)
     }
 
 }
