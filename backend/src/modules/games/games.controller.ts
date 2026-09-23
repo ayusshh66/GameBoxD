@@ -202,11 +202,11 @@ export const postGame = async(req:Request, res:Response, next:NextFunction) => {
 
 }
 
-export const patchGame = async(req:Request<{id:String}>, res:Response, next:NextFunction) => {
+export const patchGame = async(req:Request<{gameId:string},any, any, any>, res:Response, next:NextFunction) => {
 
     try {
 
-        const gameId = req.params.id;
+        const {gameId} = req.params;
 
         if (!gameId) {
             return res.status(400).json({
@@ -226,7 +226,7 @@ export const patchGame = async(req:Request<{id:String}>, res:Response, next:Next
 
         const data = result.data
 
-        const update = await updateGame(gameId as string ,data );
+        const update = await updateGame(gameId  ,data );
 
         if(!update){
             return res.status(400).json({
