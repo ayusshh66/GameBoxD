@@ -1,6 +1,6 @@
 import express ,{ NextFunction, Request, Response} from "express";
-import { createGame, getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames } from "./games.service";
-import { createGameSchema } from "./games.validation";
+import { createGame, getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames, updateGame } from "./games.service";
+import { createGameSchema, updateGameSchema } from "./games.validation";
 
 
 export const getGames = async(req: Request<{
@@ -197,6 +197,52 @@ export const postGame = async(req:Request, res:Response, next:NextFunction) => {
         
     } catch (error) {
         console.error("error in creating new game", error)
+        next(error);
+    }
+
+}
+
+export const patchGame = async(req:Request<{id:String}>, res:Response, next:NextFunction) => {
+
+    try {
+
+        const gameId = req.params.id;
+
+        if (!gameId) {
+            return res.status(400).json({
+            success: false,
+            message: "Game ID parameter is required",
+        });
+}
+
+        const result = await updateGameSchema.safeParseAsync(req.body);
+
+        if(!result.success){
+            return res.status(400).json({
+                success:false,
+                message:"wring input on update fields"
+            })
+        }
+
+        const data = result.data
+
+        const update = await updateGame(gameId as string ,data );
+
+        if(!update){
+            return res.status(400).json({
+                success:false,
+                message:"no game found"
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:"game successfully updated!",
+            data:update,
+        })
+        
+    } catch (error) {
+        console.error("error in updating the game", error);
         next(error);
     }
 
