@@ -225,3 +225,17 @@ export const updateGame = async(
     })
 
 }
+
+export const deleteGame = async(gameId: string) => {
+
+    const [deleted] = await db.delete(games).where(eq(games.id, gameId)).returning();
+
+    if(!deleted){
+        return null;
+    }
+
+    return deleted;
+
+}   
+
+
