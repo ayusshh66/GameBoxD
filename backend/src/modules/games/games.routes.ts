@@ -9,6 +9,7 @@ import {
   searchTopGames,
   postGame,
   patchGame,
+  deletedGame,
 } from "./games.controller";
 import { authenticate } from "../auth/auth.middleware";
 import { authorize } from "../../db/middleware/authorize";
@@ -33,6 +34,13 @@ router.patch(
   authorize("admin","moderator"),
   patchGame as RequestHandler,
 );
+
+router.delete(
+  "/:gameId",
+  authenticate,
+  authorize("admin"),
+  deletedGame
+)
 
 router.post(
   "/",
