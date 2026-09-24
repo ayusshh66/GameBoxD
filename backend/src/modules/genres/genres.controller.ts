@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import { getAllGenres } from "./genres.service";
+import { getAllGenres, getAllGenresById } from "./genres.service";
 
 export const getAllGenresController = async (
   req: Request,
@@ -19,4 +19,23 @@ export const getAllGenresController = async (
   }
 };
 
+export const getAllGenreByIdController = async(req:Request<{genreId:string}>, res:Response,next:NextFunction) => {
 
+    const {genreId} = req.params;
+
+    const genreById = await getAllGenresById(genreId);
+
+    if(!genreById){
+        return res.status(400).json({
+            success:false,
+            message:"genre not found",
+        })
+    }
+
+    return res.status(200).json({
+        success:true,
+        message:"genre found",
+        data:genreById,
+    })
+
+}
