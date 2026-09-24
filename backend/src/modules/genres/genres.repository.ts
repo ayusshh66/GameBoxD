@@ -30,3 +30,17 @@ export const findGenreBySlug = async(slug:string) => {
     return genreBySlug
 
 }
+
+export const createGenre = async(data:{
+    name: string,
+    slug:string
+}) => {
+
+    const newGenre = await db.insert(genres).values({
+        name : data.name,
+        slug: data.slug
+    }).returning();
+
+    return newGenre;
+
+}
