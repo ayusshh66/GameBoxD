@@ -1,6 +1,5 @@
 import { db, genres } from "../../db"
-import { desc } from "drizzle-orm"
-
+import { desc,eq } from "drizzle-orm"
 
 export const findAllGenres = async() => {
 
@@ -19,5 +18,15 @@ export const findGenresById = async(genreId: string) => {
     })
 
     return genresById;
+
+}
+
+export const findGenreBySlug = async(slug:string) => {
+
+    const genreBySlug = await db.query.genres.findFirst({
+        where : (genres, {eq}) => (eq(genres.slug, slug)),
+    })
+
+    return genreBySlug
 
 }
