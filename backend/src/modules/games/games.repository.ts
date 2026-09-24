@@ -1,7 +1,6 @@
 import { db, games } from "../../db";
 import { asc, desc, eq, ilike } from "drizzle-orm";
 
-
 export const findAllGames = async(limit : number,
     offset: number
 ) => {

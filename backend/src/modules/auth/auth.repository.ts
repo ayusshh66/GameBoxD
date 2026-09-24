@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db,users } from "../../db/index";
 
-
 export const findUserByEmail = async(email:string) =>{
 
     try {
@@ -56,4 +55,3 @@ export const createUser = async(data : {
     }
 
 }
-

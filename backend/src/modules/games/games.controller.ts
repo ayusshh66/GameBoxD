@@ -3,7 +3,6 @@ import { createGame, getAllGames, getGameBySlug, getLatestGames, getSearchTopGam
 import { createGameSchema, updateGameSchema } from "./games.validation";
 import { db, games } from "../../db"
 
-
 export const getGames = async(req: Request<{
     limit : number,
     page : number,
@@ -182,9 +181,11 @@ export const postGame = async(req:Request, res:Response, next:NextFunction) => {
         const result = await createGameSchema.safeParseAsync(req.body);
 
         if(!result.success){
+            // console.log("ZOD ERRORS:", result.error.format());
             return res.status(400).json({
                 success:false,
-                message: "inavlid input"
+                message: "inavlid input",
+                errors: result.error.flatten().fieldErrors,
             })
         }
 

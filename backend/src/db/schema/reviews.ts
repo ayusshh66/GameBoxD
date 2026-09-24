@@ -258,4 +258,3 @@ export const userFollows = pgTable(
     ),
   ],
 );
-

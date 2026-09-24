@@ -3,7 +3,6 @@ import { loginSchema, registerSchema } from "./auth.validation";
 import { loginUser, registerUser } from "./auth.service";
 import { es } from "zod/v4/locales";
 
-
 export const register = async(req: Request, res : Response, next : NextFunction) => {
 
     try {

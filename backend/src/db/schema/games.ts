@@ -91,7 +91,7 @@ export const games = pgTable(
 
     backgroundUrl: text("background_url"),
 
-    releaseDate: date("release_date", { mode: "date" }),
+    releaseDate: date("release_date", { mode: "string" }),
 
     status: gameStatusEnum("status") // status enum defined above 
       .notNull()

@@ -1,5 +1,8 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
+
+// Point dotenv directly to src/.env
+config({ path: './src/.env' });
 
 export default defineConfig({
   out: './drizzle',
