@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
-import { getAllGenres, getAllGenresById, getGenresBySlug } from "./genres.service";
+import { createGenreService, getAllGenres, getAllGenresById, getGenresBySlug } from "./genres.service";
+import { createGenreSchema } from "./genres.validation";
 
 export const getAllGenresController = async (
   req: Request,
@@ -21,7 +22,9 @@ export const getAllGenresController = async (
 
 export const getAllGenreByIdController = async(req:Request<{genreId:string}>, res:Response,next:NextFunction) => {
 
-    const {genreId} = req.params;
+   try {
+
+     const {genreId} = req.params;
 
     const genreById = await getAllGenresById(genreId);
 
@@ -37,12 +40,18 @@ export const getAllGenreByIdController = async(req:Request<{genreId:string}>, re
         message:"genre found",
         data:genreById,
     })
+    
+   } catch (error) {
+    next(error)
+   }
 
 }
 
 export const getAllGenreBySlugController = async(req:Request<{slug:string}>,res:Response, next:NextFunction) => {
 
-    const {slug} = req.params;
+   try {
+
+     const {slug} = req.params;
 
     const genreBySlug = await getGenresBySlug(slug);
 
@@ -59,5 +68,39 @@ export const getAllGenreBySlugController = async(req:Request<{slug:string}>,res:
         message:"genre found!",
         data:genreBySlug,
     })
+    
+   } catch (error) {
+    next(error)
+   }
+
+}
+
+export const createGenreController = async(req:Request,res:Response, next:NextFunction) => {
+
+    try {
+
+        const result = await createGenreSchema.safeParseAsync(req.body);
+
+    if(!result.success){
+        return res.status(400).json({
+            success:false,
+            message:"invalid input",
+            error:result.error.format()
+        })
+    }
+
+    const data = result.data;
+
+    const genre = await createGenreService(data);
+
+    return res.status(200).json({
+        success:true,
+        message:"genre created successfully!",
+        data:genre,
+    })
+        
+    } catch (error) {
+        next(error)
+    }
 
 }
