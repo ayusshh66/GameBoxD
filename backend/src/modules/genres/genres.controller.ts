@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
-import { createGenreService, getAllGenres, getAllGenresById, getGenresBySlug } from "./genres.service";
-import { createGenreSchema } from "./genres.validation";
+import { createGenreService, getAllGenres, getAllGenresById, getGenresBySlug, updateGenreService } from "./genres.service";
+import { createGenreSchema, updateGenreSchema } from "./genres.validation";
 
 export const getAllGenresController = async (
   req: Request,
@@ -98,6 +98,38 @@ export const createGenreController = async(req:Request,res:Response, next:NextFu
         message:"genre created successfully!",
         data:genre,
     })
+        
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+export const updateGenreController = async(req:Request<{genreId:string}>, res:Response, next:NextFunction) => {
+
+    try {
+
+        const {genreId} = req.params;
+
+        const result = await updateGenreSchema.safeParseAsync(req.body);
+
+        if(!result.success){
+            return res.status(400).json({
+                succes:false,
+                message:"invalid input",
+                erorr : result.error.format();
+            })
+        }
+
+        const data = result.data;
+
+        const updatedGenre = await updateGenreService(genreId,data);
+
+        return res.status(200).json({
+            success:true,
+            message:"genre updated successfully!",
+            data:updatedGenre,
+        })
         
     } catch (error) {
         next(error)
