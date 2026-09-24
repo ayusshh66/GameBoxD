@@ -40,3 +40,17 @@ export const updateGenreService = async(genreId:string, data:UpdateGenreInput) =
     return await updateGenre(genreId,data);
 
 }
+
+export const deleteGenreService = async(genreId:string) => {
+
+    const existingGenre = await db.query.genres.findFirst({
+        where : (genres, {eq}) => (eq(genres.id, genreId)),
+    })
+
+    if(!existingGenre){
+        return null;
+    }
+
+    return await deleteGenre(genreId);
+
+}
