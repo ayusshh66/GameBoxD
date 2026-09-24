@@ -12,3 +12,12 @@ export const findAllGenres = async() => {
 
 }
 
+export const findGenresById = async(genreId: string) => {
+
+    const genresById = await db.query.genres.findFirst({
+        where : (genres, {eq}) => (eq(genres.id, genreId)),
+    })
+
+    return genresById;
+
+}
