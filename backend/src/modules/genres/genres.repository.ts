@@ -44,3 +44,14 @@ export const createGenre = async(data:{
     return newGenre;
 
 }
+
+export const updateGenre = async(genreId:string, data: {
+    name?:string,
+    slug?:string,
+}) => {
+
+    const updatedGenre = await db.update(genres).set(data).where(eq(genres.id,genreId)).returning();
+
+    return updateGenre;
+
+}
