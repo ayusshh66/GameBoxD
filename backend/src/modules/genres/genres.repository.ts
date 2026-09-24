@@ -36,7 +36,7 @@ export const createGenre = async(data:{
     slug:string
 }) => {
 
-    const newGenre = await db.insert(genres).values({
+    const [newGenre] = await db.insert(genres).values({
         name : data.name,
         slug: data.slug
     }).returning();
@@ -50,8 +50,16 @@ export const updateGenre = async(genreId:string, data: {
     slug?:string,
 }) => {
 
-    const updatedGenre = await db.update(genres).set(data).where(eq(genres.id,genreId)).returning();
+    const [updatedGenre] = await db.update(genres).set(data).where(eq(genres.id,genreId)).returning();
 
     return updateGenre;
+
+}
+
+export const deleteGenre = async(genreId:string) => {
+
+    const deletedGenre = await db.delete(genres).where(eq(genres.id, genreId)).returning();
+
+    return deleteGenre;
 
 }
