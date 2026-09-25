@@ -1,4 +1,4 @@
-import { findAllTags } from "./tags.repository"
+import { findAllTags, findTagById } from "./tags.repository"
 
 
 export const getAllTagService = async() => {
@@ -7,3 +7,8 @@ export const getAllTagService = async() => {
 
 }
 
+export const getTagById = async(tagId:string) => {
+
+    return await findTagById(tagId);
+
+}
