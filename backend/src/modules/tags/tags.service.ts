@@ -1,5 +1,5 @@
-import { createTag, findAllTags, findTagById, findTagBySlug } from "./tags.repository"
-import { CreateTagInput } from "./tags.validation";
+import { createTag, findAllTags, findTagById, findTagBySlug, updateTag } from "./tags.repository"
+import { CreateTagInput, UpdateTagInput } from "./tags.validation";
 
 
 export const getAllTagService = async() => {
@@ -23,5 +23,17 @@ export const getTagBySlug = async(slug:string) => {
 export const createTagService = async(data: CreateTagInput) => {
 
     return await createTag(data);
+
+}
+
+export const updateTagService = async(tagId:string, data:UpdateTagInput) => {
+
+    const existingTag = await findTagById(tagId);
+
+    if(!existingTag){
+        return null;
+    }
+
+    return await updateTag(tagId, data);
 
 }
