@@ -1,6 +1,6 @@
 import express, {Request, Response, NextFunction} from "express";
-import { createTagService, getAllTagService, getTagById, getTagBySlug } from "./tags.service";
-import { createTagSchema } from "./tags.validation";
+import { createTagService, getAllTagService, getTagById, getTagBySlug, updateTagService } from "./tags.service";
+import { createTagSchema, updateTagSchema } from "./tags.validation";
 
 
 export const getAllTagController = async(req:Request, res:Response, next:NextFunction) => {
@@ -102,6 +102,38 @@ export const createTagController = async(req:Request, res:Response, next:NextFun
         
     } catch (error) {
         next(error)
+    }
+
+}
+
+export const updateTagController = async(req:Request<{tagId:string}>, res:Response, next:NextFunction) => {
+
+    try {
+
+        const {tagId} = req.params;
+
+        const result = await updateTagSchema.safeParseAsync(req.body);
+
+        if(!result.success){
+            return res.status(400).json({
+                success:false,
+                message:"tag not updated, maybe invalid input",
+                error : result.error.format(),
+            })
+        }
+        
+        const data = result.data;
+
+        const updatedTag = await updateTagService(tagId, data)
+
+        res.status(200).json({
+            success:true,
+            message:"tag updated successfully!",
+            data:updatedTag,
+        })
+        
+    } catch (error) {
+       next(error); 
     }
 
 }
