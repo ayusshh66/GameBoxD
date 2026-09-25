@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import { createGenreService, getAllGenres, getAllGenresById, getGenresBySlug, updateGenreService } from "./genres.service";
+import { createGenreService, getAllGenres, getAllGenresById, getGenresBySlug, updateGenreService, deleteGenreService } from "./genres.service";
 import { createGenreSchema, updateGenreSchema } from "./genres.validation";
 
 export const getAllGenresController = async (
@@ -117,7 +117,7 @@ export const updateGenreController = async(req:Request<{genreId:string}>, res:Re
             return res.status(400).json({
                 succes:false,
                 message:"invalid input",
-                erorr : result.error.format();
+                erorr : result.error.format(),
             })
         }
 
@@ -129,6 +129,33 @@ export const updateGenreController = async(req:Request<{genreId:string}>, res:Re
             success:true,
             message:"genre updated successfully!",
             data:updatedGenre,
+        })
+        
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+export const deleteGenreController =  async(req:Request<{genreId:string}>, res:Response, next:NextFunction) => {
+
+    try {
+
+        const {genreId} = req.params;
+
+        const deletedUser = await deleteGenreService(genreId);
+
+        if(!deletedUser){
+            return res.status(400).json({
+                success:false,
+                message:"genre not found to delete",
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:"genre deleted successfully!",
+            data:deletedUser,
         })
         
     } catch (error) {
