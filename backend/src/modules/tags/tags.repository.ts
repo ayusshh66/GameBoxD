@@ -1,5 +1,5 @@
 import { db, tags } from "../../db"
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 export const findAllTags = async() => {
 
@@ -8,5 +8,15 @@ export const findAllTags = async() => {
     });
 
     return tags;
+
+}
+
+export const findTagById = async(tagId:string) => {
+
+    const tag = await db.query.tags.findFirst({
+        where : (tags, {eq}) => (eq(tags.id, tagId))
+    })
+
+    return tag;
 
 }
