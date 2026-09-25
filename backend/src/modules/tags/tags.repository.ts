@@ -20,3 +20,13 @@ export const findTagById = async(tagId:string) => {
     return tag;
 
 }
+
+export const findTagBySlug = async(slug:string) => {
+
+    const tag = await db.query.tags.findFirst({
+        where: (tags, {eq}) => (eq(tags.slug, slug)),
+    })
+
+    return tag;
+
+}
