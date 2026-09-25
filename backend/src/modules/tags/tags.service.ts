@@ -1,4 +1,4 @@
-import { createTag, findAllTags, findTagById, findTagBySlug, updateTag } from "./tags.repository"
+import { createTag, deleteTag, findAllTags, findTagById, findTagBySlug, updateTag } from "./tags.repository"
 import { CreateTagInput, UpdateTagInput } from "./tags.validation";
 
 
@@ -35,5 +35,17 @@ export const updateTagService = async(tagId:string, data:UpdateTagInput) => {
     }
 
     return await updateTag(tagId, data);
+
+}
+
+export const deleteTagService = async(tagId:string) => {
+
+    const existingTag = await findTagById(tagId);
+
+    if(!existingTag){
+        return null;
+    }
+
+    return await deleteTag(tagId);
 
 }
