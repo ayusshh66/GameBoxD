@@ -1,5 +1,5 @@
 import express, {Request, Response, NextFunction} from "express";
-import { getAllTagService, getTagById } from "./tags.service";
+import { getAllTagService, getTagById, getTagBySlug } from "./tags.service";
 
 
 export const getAllTagController = async(req:Request, res:Response, next:NextFunction) => {
@@ -41,3 +41,24 @@ export const getTagByIdController = async(req:Request<{tagId:string}>, res:Respo
 
 }
 
+export const getTagBySlugController = async(req:Request<{slug:string}>, res:Response, next:NextFunction) => {
+
+    const {slug} = req.params;
+
+    const tag = await getTagBySlug(slug);
+
+    if (!tag) {
+      res.status(404).json({
+        success: false,
+        message: "Tag not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+        success:true,
+        message:"tag found successfully!",
+        data:tag,
+    })
+
+}
