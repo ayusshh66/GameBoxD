@@ -30,3 +30,14 @@ export const findTagBySlug = async(slug:string) => {
     return tag;
 
 }
+
+export const createTag = async(data : {
+    name: string;
+    slug: string;
+})  => {
+
+    const newTag = await db.insert(tags).values(data).returning();
+
+    return newTag;
+
+}
