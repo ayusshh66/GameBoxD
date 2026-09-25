@@ -60,9 +60,9 @@ export const getAllGenreBySlugController = async (
   next: NextFunction,
 ) => {
   try {
-    const { slug } = req.query;
+    const { slug } = req.params;
 
-    const genreBySlug = await getGenresBySlug(slug as string); 
+    const genreBySlug = await getGenresBySlug(slug ); 
 
     if (!genreBySlug) {
       return res.status(400).json({
