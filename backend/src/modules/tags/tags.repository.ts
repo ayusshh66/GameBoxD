@@ -41,3 +41,14 @@ export const createTag = async(data : {
     return newTag;
 
 }
+
+export const updateTag = async(tagId : string,data:{
+    name?:string,
+    slug?:string,
+}) => {
+
+    const [updatedTag] = await db.update(tags).set(data).where(eq(tags.id, tagId)).returning();
+
+    return updatedTag;
+
+}
