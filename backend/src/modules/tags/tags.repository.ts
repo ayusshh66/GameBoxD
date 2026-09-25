@@ -52,3 +52,11 @@ export const updateTag = async(tagId : string,data:{
     return updatedTag;
 
 }
+
+export const deleteTag = async(tagId:string) => {
+
+    const [deletedTag] = await db.delete(tags).where(eq(tags.id, tagId)).returning();
+
+    return deletedTag;
+
+}
