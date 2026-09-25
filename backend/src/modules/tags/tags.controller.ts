@@ -1,5 +1,6 @@
 import express, {Request, Response, NextFunction} from "express";
-import { getAllTagService, getTagById, getTagBySlug } from "./tags.service";
+import { createTagService, getAllTagService, getTagById, getTagBySlug } from "./tags.service";
+import { createTagSchema } from "./tags.validation";
 
 
 export const getAllTagController = async(req:Request, res:Response, next:NextFunction) => {
@@ -22,7 +23,9 @@ export const getAllTagController = async(req:Request, res:Response, next:NextFun
 
 export const getTagByIdController = async(req:Request<{tagId:string}>, res:Response, next:NextFunction) => {
 
-    const {tagId} = req.params;
+    try {
+
+        const {tagId} = req.params;
 
     const tags = await getTagById(tagId);
 
@@ -38,12 +41,18 @@ export const getTagByIdController = async(req:Request<{tagId:string}>, res:Respo
         message:"tag found!",
         data:tags,
     })
+        
+    } catch (error) {
+        next(error)
+    }
 
 }
 
 export const getTagBySlugController = async(req:Request<{slug:string}>, res:Response, next:NextFunction) => {
 
-    const {slug} = req.params;
+    try {
+
+        const {slug} = req.params;
 
     const tag = await getTagBySlug(slug);
 
@@ -60,5 +69,39 @@ export const getTagBySlugController = async(req:Request<{slug:string}>, res:Resp
         message:"tag found successfully!",
         data:tag,
     })
+        
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+export const createTagController = async(req:Request, res:Response, next:NextFunction) => {
+
+    try {
+
+        const result = await createTagSchema.safeParseAsync(req.body);
+
+        if(!result.success){
+            return res.status(400).json({
+                success:false,
+                message:"invalid input",
+                error : result.error.format()
+            })
+        }
+
+        const data = result.data;
+
+        const newTag = await createTagService(data);
+
+        res.status(200).json({
+            success:false,
+            message:"tag created sucessfully!",
+            data:newTag,
+        })
+        
+    } catch (error) {
+        next(error)
+    }
 
 }
