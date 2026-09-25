@@ -1,5 +1,5 @@
 import express, {Request, Response, NextFunction} from "express";
-import { createTagService, getAllTagService, getTagById, getTagBySlug, updateTagService } from "./tags.service";
+import { createTagService, deleteTagService, getAllTagService, getTagById, getTagBySlug, updateTagService } from "./tags.service";
 import { createTagSchema, updateTagSchema } from "./tags.validation";
 
 
@@ -126,6 +126,14 @@ export const updateTagController = async(req:Request<{tagId:string}>, res:Respon
 
         const updatedTag = await updateTagService(tagId, data)
 
+        if (!updatedTag) {
+        res.status(404).json({
+        success: false,
+        message: "Tag not found",
+      });
+      return;
+    }
+
         res.status(200).json({
             success:true,
             message:"tag updated successfully!",
@@ -134,6 +142,33 @@ export const updateTagController = async(req:Request<{tagId:string}>, res:Respon
         
     } catch (error) {
        next(error); 
+    }
+
+}
+
+export const deleteTagController = async(req:Request<{tagId:string}>, res:Response, next:NextFunction) => {
+
+    try {
+
+        const {tagId} = req.params;
+
+        const  deletedTag = await deleteTagService(tagId);
+
+        if(!deletedTag){
+            return res.status(400).json({
+                success:false,
+                message:"tag not found!",
+            })
+        }
+
+        res.status(200).json({
+            success:true,
+            message:"tag deleted successfully!",
+            data:deletedTag,
+        })
+        
+    } catch (error) {
+        next(error)
     }
 
 }
