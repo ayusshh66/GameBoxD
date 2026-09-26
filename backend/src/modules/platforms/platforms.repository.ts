@@ -19,3 +19,13 @@ export const findPlatformById = async(platformId:string) => {
     return platform;
 
 }
+
+export const findPlatformBySlug = async(slug:string) => {
+
+    const platform = await db.query.platforms.findFirst({
+        where: (platforms,{eq}) => (eq(platforms.slug, slug))
+    })
+
+    return platform;
+
+}
