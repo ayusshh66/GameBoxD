@@ -5,11 +5,11 @@ import { authorize } from "../../db/middleware/authorize";
 
 const tagsRouter = express.Router();
 
-tagsRouter.get("/", getAllTagController);
-tagsRouter.get("/:tagId", getTagByIdController);
-tagsRouter.get("/slug/:slug", getTagBySlugController);
-tagsRouter.post("/",authenticate, authorize("admin","moderator"), createTagController);
-tagsRouter.patch("/:tagId", authenticate, authorize("admin","admin"),updateTagController as RequestHandler)
-tagsRouter.delete("/tagId", authenticate, authorize("moderator","admin"), deleteTagController as RequestHandler);
+tagsRouter.get("/", getAllTagController); //tested
+tagsRouter.get("/:tagId", getTagByIdController); //tested
+tagsRouter.get("/slug/:slug", getTagBySlugController); //tested
+tagsRouter.post("/",authenticate, authorize("admin","moderator"), createTagController); // tested
+tagsRouter.patch("/:tagId", authenticate, authorize("admin","admin"),updateTagController as RequestHandler) //tested
+tagsRouter.delete("/:tagId", authenticate, authorize("moderator","admin"), deleteTagController as RequestHandler); //tested
 
 export default tagsRouter;
