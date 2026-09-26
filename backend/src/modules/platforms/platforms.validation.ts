@@ -14,6 +14,12 @@ export const createPlatformSchema = z.object({
       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
       "Invalid slug format"
     ),
+
+  logoUrl: z
+    .string()
+    .url("Invalid logo URL")
+    .optional()
+    .nullable(),
 });
 
 export const updatePlatformSchema = z.object({
@@ -32,6 +38,12 @@ export const updatePlatformSchema = z.object({
       "Invalid slug format"
     )
     .optional(),
+
+  logoUrl: z
+    .string()
+    .url("Invalid logo URL")
+    .optional()
+    .nullable(),
 });
 
 export type CreatePlatformInput = z.infer<
