@@ -52,3 +52,11 @@ export const updatePlatform = async(platformId:string, data : {
     return updatedPlatform;
 
 }
+
+export const deletePlatform = async(platformId:string) => {
+
+    const [deletedPlatform] = await db.delete(platforms).where(eq(platforms.id, platformId)).returning();
+
+    return deletedPlatform;
+
+}
