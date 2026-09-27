@@ -1,5 +1,5 @@
-import { createPlatform, findAllPlatform, findPlatformById, findPlatformBySlug } from "./platforms.repository"
-import { CreatePlatformInput } from "./platforms.validation";
+import { createPlatform, findAllPlatform, findPlatformById, findPlatformBySlug, updatePlatform } from "./platforms.repository"
+import { CreatePlatformInput, UpdatePlatformInput } from "./platforms.validation";
 
 
 
@@ -26,3 +26,10 @@ export const createPlatformService = async(data:CreatePlatformInput) => {
     return await createPlatform(data);
 
 }
+
+export const updatePlatformService = async(platformId:string, data:UpdatePlatformInput) => {
+
+    return await updatePlatform(platformId, data);
+
+}
+

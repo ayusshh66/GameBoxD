@@ -44,10 +44,14 @@ export const createPlatform = async(data:{
 export const updatePlatform = async(platformId:string, data : {
     name?:string,
     slug?:string,
-    logoUrl?:string,
+    logoUrl?:string | null,
 }) => {
 
-    const [updatedPlatform] = await db.update(platforms).set(data).where(eq(platforms.id, platformId)).returning();
+    const [updatedPlatform] = await db.update(platforms).set({
+        name:data.name,
+        slug:data.slug,
+        logoUrl:data.logoUrl,
+    }).where(eq(platforms.id, platformId)).returning();
 
     return updatedPlatform;
 
