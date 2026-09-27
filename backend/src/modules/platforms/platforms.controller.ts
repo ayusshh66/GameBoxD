@@ -1,5 +1,5 @@
 import express, {Request, Response, NextFunction} from "express";
-import { getAllPlatform, getPlatformById, getPlatformBySlug } from "./platforms.service";
+import { createPlatformService, getAllPlatform, getPlatformById, getPlatformBySlug } from "./platforms.service";
 import { createPlatformSchema } from "./platforms.validation";
 
 
@@ -83,6 +83,24 @@ export const getPlatformBySlugController = async(req:Request<{slug:string}>,res:
 
 export const createPlatformController = async(req:Request, res:Response, next:NextFunction) => {
 
-    const result = await createPlatformSchema
+    const result = await createPlatformSchema.safeParseAsync(req.body);
+
+    if(!result.success){
+        return res.status(400).json({
+            success:false,
+            message:"invalid input",
+            error: result.error.format(),
+        })
+    }
+
+    const data  = result.data;
+
+    const newPlatform = await createPlatformService(data);
+
+    res.status(200).json({
+        success:true,
+        message:"new platform created successfully!",
+        data:newPlatform,
+    })
 
 }
