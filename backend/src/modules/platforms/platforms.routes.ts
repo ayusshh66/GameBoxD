@@ -5,11 +5,11 @@ import { authorize } from "../../db/middleware/authorize";
 
 const platformRouter = express.Router();
 
-platformRouter.get("/",getAllPlatformController);
-platformRouter.get("/:platformId",getPlatformByIdController);
-platformRouter.get("/slug/:slug",getPlatformBySlugController);
-platformRouter.post("/",authenticate,authorize("admin","moderator"),createPlatformController);
-platformRouter.patch("/:platformId",authenticate,authorize("admin","moderator"),updatePlatformController as RequestHandler) ;
-platformRouter.delete("/:platformId",authenticate,authorize("admin","moderator"),deletePlatformController as RequestHandler) ;
+platformRouter.get("/",getAllPlatformController); // tested and working
+platformRouter.get("/:platformId",getPlatformByIdController); // tested and working
+platformRouter.get("/slug/:slug",getPlatformBySlugController); // tested and working
+platformRouter.post("/",authenticate,authorize("admin","moderator"),createPlatformController); // tested and working
+platformRouter.patch("/:platformId",authenticate,authorize("admin","moderator"),updatePlatformController as RequestHandler) ; //tested and working
+platformRouter.delete("/:platformId",authenticate,authorize("admin","moderator"),deletePlatformController as RequestHandler) ; //tested and working
 
 export default platformRouter;
