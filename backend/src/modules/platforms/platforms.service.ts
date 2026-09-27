@@ -1,4 +1,4 @@
-import { createPlatform, findAllPlatform, findPlatformById, findPlatformBySlug, updatePlatform } from "./platforms.repository"
+import { createPlatform, deletePlatform, findAllPlatform, findPlatformById, findPlatformBySlug, updatePlatform } from "./platforms.repository"
 import { CreatePlatformInput, UpdatePlatformInput } from "./platforms.validation";
 
 
@@ -33,3 +33,8 @@ export const updatePlatformService = async(platformId:string, data:UpdatePlatfor
 
 }
 
+export const deletePlatformService = async(platformId:string) => {
+
+    return await deletePlatform(platformId);
+
+}
