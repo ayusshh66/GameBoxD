@@ -1,5 +1,5 @@
 import express, {Request, Response, NextFunction} from "express";
-import { createPlatformService, getAllPlatform, getPlatformById, getPlatformBySlug, updatePlatformService } from "./platforms.service";
+import { createPlatformService, deletePlatformService, getAllPlatform, getPlatformById, getPlatformBySlug, updatePlatformService } from "./platforms.service";
 import { createPlatformSchema, updatePlatformSchema } from "./platforms.validation";
 
 
@@ -83,7 +83,9 @@ export const getPlatformBySlugController = async(req:Request<{slug:string}>,res:
 
 export const createPlatformController = async(req:Request, res:Response, next:NextFunction) => {
 
-    const result = await createPlatformSchema.safeParseAsync(req.body);
+    try {
+
+        const result = await createPlatformSchema.safeParseAsync(req.body);
 
     if(!result.success){
         return res.status(400).json({
@@ -102,12 +104,18 @@ export const createPlatformController = async(req:Request, res:Response, next:Ne
         message:"new platform created successfully!",
         data:newPlatform,
     })
+        
+    } catch (error) {
+        next(error)
+    }
 
 }
 
 export const updatePlatformController = async(req:Request<{platformId:string}>,res:Response, next:NextFunction) => {
 
-    const {platformId} = req.params;
+    try {
+
+        const {platformId} = req.params;
     const result = await updatePlatformSchema.safeParseAsync(req.body);
 
     if(!result.success){
@@ -136,5 +144,38 @@ export const updatePlatformController = async(req:Request<{platformId:string}>,r
         message:"paltform udpated successfully!",
         data:updatedPlatform,
     })
+        
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+export const deletePlatformController = async(req:Request<{platformId:string}>, res:Response, next:NextFunction) => {
+
+    try {
+
+        const {platformId} = req.params;
+
+        const existingPlatform = await getPlatformById(platformId);
+
+        if(!existingPlatform){
+            return res.status(400).json({
+                succes:false,
+                message:"no platform found to delete",
+            })
+        }
+
+        const deletedPlatform = await deletePlatformService(platformId);
+
+        res.status(200).json({
+            success:true,
+            message:"platform deleted successfully!",
+            data:deletedPlatform,
+        })
+
+    } catch (error) {
+        next(error)
+    }
 
 }
