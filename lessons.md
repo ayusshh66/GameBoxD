@@ -87,6 +87,7 @@ With next(error): Your controller code stays completely clean—just next(error)
 
 ### Q2: Why use composite indexes like `(game_id, created_at)` on `reviews` instead of two separate single-column indexes?
 
+
 * **The Query Pattern in GameBoxd:**
   Reviews for a game are almost always fetched paginated and ordered by time:
   ```sql
@@ -101,3 +102,14 @@ With next(error): Your controller code stays completely clean—just next(error)
     The database engine can only pick one index effectively (or do a Bitmap Index Scan). It finds all reviews matching `game_id`, loads the records into working memory (`work_mem`), and performs an expensive in-memory sort (`Top-N Sort` node in `EXPLAIN ANALYZE`) on `created_at`. As reviews grow, this sort becomes a major memory and latency bottleneck.
   * **With composite index `(game_id, created_at)`:**
     In a B-Tree index with multiple columns, records are physically ordered first by `game_id`, and within each `game_id`, sorted by `created_at`. PostgreSQL jumps directly to the matching `game_id` branch and scans the index leaf nodes already in sorted chronological order. It satisfies **both the `WHERE` filter and the `ORDER BY` clause in a single operation**, completely avoiding an in-memory sort step.
+
+### Zod Schema vs. Inferred Type (`z.infer`)
+
+| Feature | `createPlatformSchema` (Zod Schema) | `CreatePlatformInput` (Inferred Type) |
+| :--- | :--- | :--- |
+| **Stage** | **Runtime** (When server is running) | **Compile-Time** (While writing code) |
+| **Type** | JavaScript Object | Static TypeScript Type |
+| **Purpose** | Validates incoming `req.body` payloads and blocks invalid HTTP requests | Provides VS Code autocompletion and catches code errors before running |
+| **Usage** | `createPlatformSchema.parse(req.body)` | `const createPlatform = (data: CreatePlatformInput) => ...` |
+
+> **Key Takeaway:** Use the **Zod Schema** to protect your server from invalid user inputs, and use the **Inferred Type** (`z.infer`) to maintain strict type safety across your controllers, services, and repositories without manually duplicating interfaces.

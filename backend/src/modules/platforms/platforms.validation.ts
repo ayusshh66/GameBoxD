@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createPlatformSchema = z.object({
+export const createPlatformSchema = z.object({ //runtime validation used when parsing the data from body.
   name: z
     .string()
     .min(1, "Platform name is required")
@@ -46,7 +46,7 @@ export const updatePlatformSchema = z.object({
     .nullable(),
 });
 
-export type CreatePlatformInput = z.infer<
+export type CreatePlatformInput = z.infer< // Compile-Time Type Safety used in services for data: CreatePlatformInput
   typeof createPlatformSchema
 >;
 

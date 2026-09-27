@@ -1,5 +1,6 @@
 import express, {Request, Response, NextFunction} from "express";
 import { getAllPlatform, getPlatformById, getPlatformBySlug } from "./platforms.service";
+import { createPlatformSchema } from "./platforms.validation";
 
 
 export const getAllPlatformController = async(req:Request, res:Response,next:NextFunction) => {
@@ -77,5 +78,11 @@ export const getPlatformBySlugController = async(req:Request<{slug:string}>,res:
     } catch (error) {
         next(error)
     }
+
+}
+
+export const createPlatformController = async(req:Request, res:Response, next:NextFunction) => {
+
+    const result = await createPlatformSchema
 
 }
