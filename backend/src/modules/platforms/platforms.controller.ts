@@ -1,10 +1,12 @@
 import express, {Request, Response, NextFunction} from "express";
-import { getAllPlatform, getPlatformById } from "./platforms.service";
+import { getAllPlatform, getPlatformById, getPlatformBySlug } from "./platforms.service";
 
 
 export const getAllPlatformController = async(req:Request, res:Response,next:NextFunction) => {
 
-    const platforms = await getAllPlatform();
+    try {
+
+        const platforms = await getAllPlatform();
 
     if(!platforms){
         return res.status(400).json({
@@ -17,12 +19,18 @@ export const getAllPlatformController = async(req:Request, res:Response,next:Nex
         message:"platforms fetched successfully!",
         data:platforms,
     })
+        
+    } catch (error) {
+        next(error)
+    }
 
 }
 
 export const getPlatformByIdController = async(req:Request<{platformId:string}>, res:Response, next:NextFunction) => {
 
-    const {platformId} = req.params;
+    try {
+
+        const {platformId} = req.params;
 
     const existingPlatform = await getPlatformById(platformId)
 
@@ -38,5 +46,36 @@ export const getPlatformByIdController = async(req:Request<{platformId:string}>,
         message:"paltform found successfully!",
         data:existingPlatform,
     })
+        
+    } catch (error) {
+        next(error)
+    }
+
+}
+
+export const getPlatformBySlugController = async(req:Request<{slug:string}>,res:Response, next:NextFunction) => {
+
+    try {
+
+        const {slug} = req.params;
+
+        const platform = await getPlatformBySlug(slug);
+
+        if(!platform){
+            return res.status(400).json({
+                success:false,
+                message:"platform not found",
+            })
+        }
+
+        res.status(200).json({
+            success:true,
+            message:"platform found successfully!",
+            data:platform,
+        })
+        
+    } catch (error) {
+        next(error)
+    }
 
 }
