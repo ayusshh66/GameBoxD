@@ -35,8 +35,20 @@ export const createPlatform = async(data:{
     logoUrl?: string | null,
 }) => {
 
-    const newPlatform = await db.insert(platforms).values(data).returning();
+    const [newPlatform] = await db.insert(platforms).values(data).returning();
 
     return newPlatform;
+
+}
+
+export const updatePlatform = async(platformId:string, data : {
+    name?:string,
+    slug?:string,
+    logoUrl?:string,
+}) => {
+
+    const [updatedPlatform] = await db.update(platforms).set(data).where(eq(platforms.id, platformId)).returning();
+
+    return updatedPlatform;
 
 }
