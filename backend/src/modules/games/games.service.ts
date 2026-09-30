@@ -138,7 +138,7 @@ export const updateGame = async (gameId: string, data: UpdateGameInput) => {
       where: (games, { eq }) => eq(games.id, gameId),
     });
 
-    if (!existingGame) {
+    if (!existingGame) { 
       return null;
     }
 
@@ -200,6 +200,13 @@ export const updateGame = async (gameId: string, data: UpdateGameInput) => {
     const updatedGame = await tx.query.games.findFirst({
       where: (games, { eq }) => eq(games.id, gameId),
     });
+
+    // it will delete the previous cached game, and set new game on creation
+    if (updatedGame) {
+        await redis.del(
+            `gameboxd:game:slug:${updatedGame.slug}`
+        );
+    }
 
     return updatedGame;
   });
