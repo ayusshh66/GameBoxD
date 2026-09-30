@@ -38,7 +38,20 @@ export const getUpcomingGames = async (limit: number) => {
 };
 
 export const getTopGames = async (limit: number) => {
-  return await findTopGames(limit);
+
+  const cachedKey =`games:top:${limit}`;
+
+  const cachedGame = await redis.get(cachedKey);
+
+  if(cachedGame){
+    return JSON.parse(cachedGame);
+  }
+
+  const games =  await findTopGames(limit);
+
+  await redis.set(cachedKey, JSON.stringify(cachedGame),"EX",300);
+
+  return games;
 };
 
 export const getSearchTopGames = async (query: string, limit: number, page: number) => {
