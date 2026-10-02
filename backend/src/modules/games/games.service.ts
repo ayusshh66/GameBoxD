@@ -2,6 +2,7 @@ import { findAllGames, findGameBySlug, findLatestGames, findTopGames, findUpcomi
 import { db, games, gameGenres, gamePlatforms, gameTags } from "../../db";
 import { eq } from "drizzle-orm";
 import { redis } from "../../config/redis";
+import { getOrSetCache } from "../../utils/cache";
 
 export const getAllGames = async (limit: number, page: number) => {
   const offset = (page - 1) * limit;
@@ -9,24 +10,11 @@ export const getAllGames = async (limit: number, page: number) => {
 };
 
 export const getGameBySlug = async (slug: string) => {
-  const cachedKey = `game:slug:${slug}`;
-
-  // gets the value of the game from the chachedKey
-  const cachedGame = await redis.get(cachedKey);
-
-  if(cachedGame){
-    return JSON.parse(cachedGame);
-  }
-
-  const game =  await findGameBySlug(slug);
-
-  if(!game){
-    return null;
-  }
-  //saved result of game into redis cachedKey
-  await redis.set(cachedKey, JSON.stringify(cachedGame),"EX",300);
-
-  return game;
+  return getOrSetCache(
+    `gameboxd:game:slug:${slug}`,
+    () => findGameBySlug(slug),
+    300
+  );
 };
 
 export const getLatestGames = async (limit: number) => {
