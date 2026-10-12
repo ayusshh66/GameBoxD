@@ -220,5 +220,7 @@ export const deleteGame = async (gameId: string) => {
     return null;
   }
 
+  redis.del(`gameboxd:game:slug:${deleted.slug}`);
+
   return deleted;
 };
