@@ -10,11 +10,23 @@ export const getAllGames = async (limit: number, page: number) => {
 };
 
 export const getGameBySlug = async (slug: string) => {
-  return getOrSetCache(
+  const game = await getOrSetCache(
     `gameboxd:game:slug:${slug}`,
     () => findGameBySlug(slug),
     300
   );
+
+  if(!game){
+    return null;
+  }
+
+  try {
+    await incrementGameView(game.id);
+  } catch (error) {
+    console.error("Failed to increment game views:", error);
+  }
+
+  return game;
 };
 
 export const getLatestGames = async (limit: number) => {
