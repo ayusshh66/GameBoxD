@@ -246,3 +246,13 @@ export const incrementGameView = async(gameId:string) : Promise<number> => {
   return views;
 
 }
+
+const getGameViews = async(gameId:string):Promise<number> => {
+
+  const key = `gameboxd:game:views:${gameId}`;
+
+  const views = await redis.get(key);
+
+  return Number(views ?? 0)
+
+}

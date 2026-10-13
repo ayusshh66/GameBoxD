@@ -2,6 +2,7 @@ import express ,{ NextFunction, Request, Response} from "express";
 import { createGame, getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames, updateGame, deleteGame } from "./games.service";
 import { createGameSchema, updateGameSchema } from "./games.validation";
 import { db, games } from "../../db"
+import { redis } from "../../config/redis";
 
 export const getGames = async(req: Request<{
     limit : number,
@@ -277,3 +278,4 @@ export const deletedGame = async(req:Request, res:Response, next:NextFunction) =
     }
 
 }
+
