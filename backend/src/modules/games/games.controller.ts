@@ -1,8 +1,10 @@
 import express ,{ NextFunction, Request, Response} from "express";
-import { createGame, getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames, updateGame, deleteGame } from "./games.service";
+import { createGame, getAllGames, getGameBySlug, getLatestGames, getSearchTopGames, getTopGames, getUpcomingGames, updateGame, deleteGame, getGameViews } from "./games.service";
 import { createGameSchema, updateGameSchema } from "./games.validation";
 import { db, games } from "../../db"
 import { redis } from "../../config/redis";
+import { getOrSetCache } from "../../utils/cache";
+import { findGameBySlug } from "./games.repository";
 
 export const getGames = async(req: Request<{
     limit : number,
@@ -279,3 +281,38 @@ export const deletedGame = async(req:Request, res:Response, next:NextFunction) =
 
 }
 
+export const getGameViewsController = async(req:Request<{slug:string}>, res:Response, next:NextFunction) => {
+
+    try {
+
+        const {slug} = req.params;
+        const key = `gameboxd:game:slug:${slug}`
+
+        const game = await getOrSetCache(key,
+            () => findGameBySlug(slug),
+            300
+        )
+
+        if(!game){
+            return res.status(400).json({
+                message:"game not found"
+            })
+        }
+
+        const views = await getGameViews(game.id);
+
+        return res.status(200).json({
+            success:true,
+            message:`successfully fetched views of ${game.name}`,
+            data:{
+                gameId: game.id,
+                views,
+            }
+        })
+        
+    } catch (error) {
+        console.error("error in getting game views", error);
+        next(error)
+    }
+
+}

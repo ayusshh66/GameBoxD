@@ -247,7 +247,7 @@ export const incrementGameView = async(gameId:string) : Promise<number> => {
 
 }
 
-const getGameViews = async(gameId:string):Promise<number> => {
+export const getGameViews = async(gameId:string):Promise<number> => {
 
   const key = `gameboxd:game:views:${gameId}`;
 
