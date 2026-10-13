@@ -10,6 +10,7 @@ import {
   postGame,
   patchGame,
   deletedGame,
+  getGameViewsController,
 } from "./games.controller";
 import { authenticate } from "../auth/auth.middleware";
 import { authorize } from "../../db/middleware/authorize";
@@ -27,6 +28,8 @@ router.get("/top", topGames);
 router.get("/search", searchTopGames);
 
 router.get("/:slug", getGame);
+
+router.get("/:slug/views", getGameViewsController);
 
 router.patch(
   "/:gameId",
