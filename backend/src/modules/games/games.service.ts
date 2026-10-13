@@ -224,3 +224,13 @@ export const deleteGame = async (gameId: string) => {
 
   return deleted;
 };
+
+export const incrementGameView = async(gameId:string) : Promise<number> => {
+
+  const key = `gameboxd:game:views:${gameId}`;
+
+  const views = await redis.incr(key);
+
+  return views;
+
+}
