@@ -9,26 +9,31 @@ export const getAllGames = async (limit: number, page: number) => {
   return await findAllGames(limit, offset);
 };
 
-export const getGameBySlug = async (slug: string) => {
+export const getGameBySlug = async (
+  slug: string,
+  userId?: string
+) => {
   const game = await getOrSetCache(
     `gameboxd:game:slug:${slug}`,
     () => findGameBySlug(slug),
     300
   );
 
-  if(!game){
+  if (!game) {
     return null;
   }
 
-  try {
-    await incrementGameView(game.id);
-  } catch (error) {
-    console.error("Failed to increment game views:", error);
+  // Count unique views only for logged-in users
+  if (userId) {
+    try {
+      await incrementUniqueGameView(game.id, userId);
+    } catch (error) {
+      console.error("Failed to increment game views:", error);
+    }
   }
 
   return game;
 };
-
 export const getLatestGames = async (limit: number) => {
   return await findLatestGames(limit);
 };
@@ -237,13 +242,21 @@ export const deleteGame = async (gameId: string) => {
   return deleted;
 };
 
-export const incrementGameView = async(gameId:string) : Promise<number> => {
+export const incrementUniqueGameView = async(gameId:string, userId : string) => {
 
-  const key = `gameboxd:game:views:${gameId}`;
+  const dupeKey = `gameboxd:gamedupe:${gameId}: ${userId}`;
 
-  const views = await redis.incr(key);
+  const viewsKey = `gameboxd:game:views:${gameId}`;
 
-  return views;
+  const result = await redis.set(dupeKey, "1", "EX",3600, "NX");
+
+  if(result !== "OK"){
+    return false;
+  }
+
+  await redis.incr(viewsKey);
+
+  return true;
 
 }
 
