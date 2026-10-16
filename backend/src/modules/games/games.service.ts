@@ -1,6 +1,6 @@
 import { findAllGames, findGameBySlug, findLatestGames, findTopGames, findUpcominigGames, searchGames } from "./games.repository";
 import { db, games, gameGenres, gamePlatforms, gameTags } from "../../db";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { redis } from "../../config/redis";
 import { getOrSetCache } from "../../utils/cache";
 
@@ -270,45 +270,6 @@ export const getGameViews = async(gameId:string):Promise<number> => {
 
 }
 
-export const increaseTrendingScore = async(gameId:string, point: 1):Promise<number> => {
-
-  const trendingScoreKey = `gameboxd:trending:games`
-
-  const result = await redis.zincrby(
-    trendingScoreKey,
-    point,
-    gameId
-  )
-
-  return Number(result);
-
-}
-
-export const getTrendingGames = async(limit:10) => {
-
-  const result = await redis.zrevrange(
-    `gameboxd:trending:games`,
-    0,
-    limit-1,
-    "WITHSCORES"
-  )
-
-  const trendings : {
-    gameId: string;
-    score:number;
-  }[] = []
-
-  for(let i=0; i < result.length ; i=+2){
-    trendings.push({
-      gameId: result[i],
-      score : Number(result[i+1]),
-    })
-  }
-
-  return trendings;
-
-}
-
 export const increaseDailyTrendingScore = async(gameId:string, point : 1) => {
 
   const today = new Date().toISOString().slice(0,10)
@@ -319,4 +280,56 @@ export const increaseDailyTrendingScore = async(gameId:string, point : 1) => {
 
   //retain daily trending score for 8 days window
   await redis.expire(key, 8*60*60*24);
+}
+
+export const getDailyTrendingScore = async(limit:10) => {
+
+  const today = new Date().toDateString().slice(0,10);
+
+  const result = await redis.zrevrange(
+    `gameboxd:trending:${today}`,
+    0,
+    limit-1,
+    "WITHSCORES",
+  )
+
+  if(result.length === 0){
+    return [];
+  }
+
+  const trending : {
+    gameId:string;
+    score:number;
+  }[] = [];
+
+  for(let i = 0; i < result.length ; i+=2){
+    trending.push({
+      gameId: result[i],
+      score : Number(result[i+1]),
+    })
+  }
+
+  const gameIds = trending.map((item) => item.gameId)
+
+  //inArray filter outs the games.ids which are in gameIds array taht is defined above
+  const gameDetails = await db.select().from(games).where(inArray(games.id, gameIds));
+
+  const gameMap = new Map(
+    gameDetails.map((item) => [item.id, item])
+  )
+
+  // diff bw flaMap() & map() is flat map gives clean fomrat, if any sno. is missing then faltmap wont give empty array but map will
+  return trending.flatMap((item) => {
+    const game = gameMap.get(item.gameId);
+
+    if (!game) {
+      return [];
+    }
+
+    return [{
+      ...game,
+      trendingScore: item.score,
+    }];
+  });
+
 }
