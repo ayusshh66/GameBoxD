@@ -308,3 +308,15 @@ export const getTrendingGames = async(limit:10) => {
   return trendings;
 
 }
+
+export const increaseDailyTrendingScore = async(gameId:string, point : 1) => {
+
+  const today = new Date().toISOString().slice(0,10)
+
+  const key = `gameboxd:trending:${today}`;
+
+  const result = await redis.zincrby(key,point, gameId);
+
+  //retain daily trending score for 8 days window
+  await redis.expire(key, 8*60*60*24);
+}
