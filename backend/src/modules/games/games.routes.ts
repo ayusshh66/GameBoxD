@@ -11,6 +11,7 @@ import {
   patchGame,
   deletedGame,
   getGameViewsController,
+  todayTrendingGameController,
 } from "./games.controller";
 import { authenticate } from "../auth/auth.middleware";
 import { authorize } from "../../db/middleware/authorize";
@@ -26,6 +27,8 @@ router.get("/upcoming", upcomingGames);
 router.get("/top", topGames);
 
 router.get("/search", searchTopGames);
+
+router.get("/trending", todayTrendingGameController)
 
 router.get("/:slug", getGame);
 
