@@ -284,3 +284,27 @@ export const increaseTrendingScore = async(gameId:string, point: 1):Promise<numb
 
 }
 
+export const getTrendingGames = async(limit:10) => {
+
+  const result = await redis.zrevrange(
+    `gameboxd:trending:games`,
+    0,
+    limit-1,
+    "WITHSCORES"
+  )
+
+  const trendings : {
+    gameId: string;
+    score:number;
+  }[] = []
+
+  for(let i=0; i < result.length ; i=+2){
+    trendings.push({
+      gameId: result[i],
+      score : Number(result[i+1]),
+    })
+  }
+
+  return trendings;
+
+}
