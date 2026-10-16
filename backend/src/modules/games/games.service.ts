@@ -26,7 +26,11 @@ export const getGameBySlug = async (
   // Count unique views only for logged-in users
   if (userId) {
     try {
-      await incrementUniqueGameView(game.id, userId);
+      const counted = await incrementUniqueGameView(game.id, userId);
+
+      if(counted){
+        await increaseDailyTrendingScore(game.id,1)
+      }
     } catch (error) {
       console.error("Failed to increment game views:", error);
     }
@@ -34,6 +38,7 @@ export const getGameBySlug = async (
 
   return game;
 };
+
 export const getLatestGames = async (limit: number) => {
   return await findLatestGames(limit);
 };
