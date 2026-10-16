@@ -269,3 +269,18 @@ export const getGameViews = async(gameId:string):Promise<number> => {
   return Number(views ?? 0)
 
 }
+
+export const increaseTrendingScore = async(gameId:string, point: 1):Promise<number> => {
+
+  const trendingScoreKey = `gameboxd:trending:games`
+
+  const result = await redis.zincrby(
+    trendingScoreKey,
+    point,
+    gameId
+  )
+
+  return Number(result);
+
+}
+
