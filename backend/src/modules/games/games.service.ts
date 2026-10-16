@@ -287,7 +287,7 @@ export const increaseDailyTrendingScore = async(gameId:string, point : 1) => {
   await redis.expire(key, 8*60*60*24);
 }
 
-export const getDailyTrendingScore = async(limit:10) => {
+export const getDailyTrendingScore = async(limit:number) => {
 
   const today = new Date().toDateString().slice(0,10);
 
