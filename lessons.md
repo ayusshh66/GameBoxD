@@ -113,3 +113,129 @@ With next(error): Your controller code stays completely clean—just next(error)
 | **Usage** | `createPlatformSchema.parse(req.body)` | `const createPlatform = (data: CreatePlatformInput) => ...` |
 
 > **Key Takeaway:** Use the **Zod Schema** to protect your server from invalid user inputs, and use the **Inferred Type** (`z.infer`) to maintain strict type safety across your controllers, services, and repositories without manually duplicating interfaces.
+
+# Lesson: `.for("update")` in Drizzle ORM
+
+## 1. What is `.for("update")`?
+
+`.for("update")` is a Drizzle ORM method that generates PostgreSQL's `SELECT ... FOR UPDATE` statement.
+
+It **locks selected database rows until the current transaction finishes**.
+
+**Important:** Despite its name, `.for("update")` does not update any data. It only locks rows to coordinate concurrent database operations.
+
+## 2. Why do we need it?
+
+Imagine two users rate Elden Ring at the same time:
+
+- User A gives 5 stars.
+- User B gives 4 stars.
+
+Both requests must save their ratings and recalculate the game's `averageRating` and `ratingsCount`.
+
+If these operations run concurrently without proper coordination, one transaction might overwrite statistics calculated by another transaction.
+
+We use `.for("update")` to make these transactions take turns when updating the same game's statistics.
+
+## 3. Example from GameboxD
+
+```ts
+const [game] = await tx
+  .select({
+    id: games.id,
+    slug: games.slug,
+  })
+  .from(games)
+  .where(eq(games.id, gameId))
+  .for("update");
+
+if (!game) return null;
+```
+
+### Explanation
+
+- `tx.select()` — Selects data using the current transaction.
+- `id: games.id` — Retrieves the game's ID.
+- `slug: games.slug` — Retrieves the game's slug.
+- `.from(games)` — Reads from the `games` table.
+- `.where(eq(games.id, gameId))` — Selects the requested game.
+- `.for("update")` — Locks that game's row until the transaction commits or rolls back.
+
+This query locks only the matching row in the `games` table, not the entire table or the individual rows in `user_game_ratings`.
+
+## 4. How does the lock work?
+
+Suppose User A and User B rate the same game simultaneously.
+
+**Transaction A:**
+1. Selects Elden Ring using `.for("update")`.
+2. Acquires a lock on Elden Ring's row.
+3. Inserts or updates User A's rating.
+4. Recalculates the average rating.
+5. Commits the transaction and releases the lock.
+
+**Transaction B:**
+1. Tries to select Elden Ring using `.for("update")`.
+2. Waits because Transaction A holds a conflicting lock.
+3. Acquires the lock after Transaction A commits.
+4. Saves User B's rating.
+5. Recalculates statistics using the latest committed changes.
+6. Commits and releases the lock.
+
+This helps ensure the game's final statistics reflect both ratings.
+
+## 5. Why lock the `games` row instead of the `user_game_ratings` row?
+
+Each user has their own rating row, but multiple users affect the same game's statistics.
+
+For example:
+
+| userId | gameId | rating |
+|---|---|---|
+| user-A | game-1 | 5.0 |
+| user-B | game-1 | 4.0 |
+
+Both ratings affect these fields in the `games` table:
+
+```ts
+averageRating
+ratingsCount
+```
+
+We lock the game's row because it is the shared resource.
+
+**Note:** This works when all operations that modify the same game's rating statistics follow the same locking convention.
+
+## 6. `.for("update")` vs `.update()`
+
+These are different operations.
+
+### `.for("update")` — Locks a row
+
+```ts
+const [game] = await tx
+  .select()
+  .from(games)
+  .where(eq(games.id, gameId))
+  .for("update");
+```
+
+This does not change any data.
+
+### `.update()` — Modifies a row
+
+```ts
+await tx
+  .update(games)
+  .set({ ratingsCount: 12 })
+  .where(eq(games.id, gameId));
+```
+
+This actually changes the `ratingsCount` value.
+
+## 7. Why use `tx.select()` instead of `db.select()`?
+
+We are working inside a transaction:
+
+```ts
+await
