@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   uuid,
+  unique
 } from "drizzle-orm/pg-core";
 
 import { users } from "./users";
@@ -63,6 +64,7 @@ export const userGameRatings = pgTable(
       ],
     }),
   ],
+  
 );
 
 export const reviews = pgTable(
@@ -115,6 +117,10 @@ export const reviews = pgTable(
       table.userId,
       table.createdAt,
     ),
+    unique("reviews_user_game_unique").on(
+  table.userId,
+  table.gameId
+),
   ],
 );
 
