@@ -1,5 +1,5 @@
 import { games } from "../../db/schema/games";
-import { userGameRatings } from "../../db/schema/reviews"
+import { reviews, userGameRatings } from "../../db/schema/reviews"
 import { and, desc, eq, sql } from "drizzle-orm";
 
 
@@ -19,5 +19,20 @@ const refreshRatingStats = async(
         averageRating : stats.average,
         ratingCount : stats.count,
     }).when(eq(games.id, gameId));
+
+}
+
+const reviewsCountStats = async(
+    tx:any,
+    gameId:string,
+) => {
+
+    const [stats] = await tx.select({
+        count :  sql<number>`COUNT(*)::integer`,
+    }).from(reviews).when(eq(reviews.gameId, gameId))
+
+    await tx.update(games).set({
+        reviewsCount : stats.count,
+    }).where(eq(games.id, gameId))
 
 }
