@@ -115,3 +115,61 @@ export const removeGameRating = async(
     })
 
 }
+
+export const insertGameReview = async(
+    gameId:string,
+    userId:string,
+    data: {
+        content: string,
+        isSpoiler: boolean,
+    }
+) => {
+
+    return db.transaction(async(tx) => {
+
+        const [gameData] = await tx.select({
+            id:games.id,
+            slug:games.slug
+        }).from(games).where(
+            eq(
+                games.id, gameId
+            )
+        ).for("update")
+
+        const [exisitingUser] = await tx.select({
+            id:reviews.id
+        }).from(reviews).where(
+            and(
+                eq(
+                    reviews.gameId, gameId,
+                ),
+                eq(
+                    reviews.userId, userId
+                )
+            )
+        ).limit(1);
+
+        if(exisitingUser){
+            return {
+                message: "review already existed, please update it" 
+            }
+        }
+
+        const [insert] = await tx.insert(reviews).values({
+            gameId,
+            userId,
+            content: data.content,
+            isSpoiler: data.isSpoiler,
+        }).returning();
+
+        await refreshReviewCount(tx, gameId);
+
+        return {
+            status : "created",
+            data : insert,
+            slug: gameData.slug
+        }
+
+    })
+
+}
