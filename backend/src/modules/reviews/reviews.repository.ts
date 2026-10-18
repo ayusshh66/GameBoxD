@@ -253,7 +253,7 @@ export const editGameReview = async(
     if(!updated) return null;
 
     return {
-      result : updated,
+      review : updated,
       slug: game.slug
     }
   })
