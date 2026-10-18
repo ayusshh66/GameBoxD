@@ -232,6 +232,7 @@ export const editGameReview = async(
 
     if(!exisitingReview) return null;
 
+    // we need to fetch slug for redis caching!!!
     const [game] = await tx.select({
       slug: games.slug
     }).from(games).where(eq(games.id, exisitingReview.gameId)).for("update");
@@ -255,6 +256,40 @@ export const editGameReview = async(
       result : updated,
       slug: game.slug
     }
+  })
+
+}
+
+export const removeGameReview = async(
+  reviewId:string,
+  userId: string,
+) => {
+
+  return db.transaction(async(tx) => {
+
+    const exisitingReview = await tx.query.reviews.findFirst({
+      columns : {
+        gameId:true,
+      },
+      where : (reviews,{eq,and}) => and(eq(reviews.id, reviewId), eq(reviews.userId, userId))
+    })
+
+    if(!exisitingReview) return null;
+
+    const [game] = await tx.select({slug:games.slug}).from(games).where(eq(games.id, exisitingReview.gameId)).for("update");
+
+    if(!game) return null;
+
+    const [deleted] = await tx.delete(reviews).where(and(eq(reviews.id, reviewId), eq(reviews.userId, userId))).returning();
+
+    if(!deleted) return null;
+
+    return {
+      reviewEdited : true,
+      review : deleted,
+      slug: game.slug
+    }
+
   })
 
 }
