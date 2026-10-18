@@ -211,3 +211,50 @@ export const findGameReviews = async (
     offset,
   });
 };
+
+export const editGameReview = async(
+  reviewId:string,
+  userId:string,
+  data: {
+    content?:string,
+    isSpoiler?: boolean,
+  }
+) => {
+
+  return await db.transaction(async(tx) => {
+
+    const exisitingReview = await tx.query.reviews.findFirst({
+      columns : {
+        gameId: true,
+      },
+      where : (reviews, {eq,and}) => and(eq(reviews.userId, userId), eq(reviews.id, reviewId) ) 
+    })
+
+    if(!exisitingReview) return null;
+
+    const [game] = await tx.select({
+      slug: games.slug
+    }).from(games).where(eq(games.id, exisitingReview.gameId)).for("update");
+
+    if(!game) return null;
+
+    const [updated] = await tx.update(reviews).set({
+      ...data,
+      isEdited: true,
+      updatedAt: new Date(),
+    }).where(
+      and(
+        eq(reviews.id, reviewId),
+        eq(reviews.userId, userId)
+      )
+    ).returning();
+
+    if(!updated) return null;
+
+    return {
+      result : updated,
+      slug: game.slug
+    }
+  })
+
+}
