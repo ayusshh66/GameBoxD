@@ -1,5 +1,5 @@
 import {redis} from "../../config/redis"
-import { upsertGameRating } from "./reviews.repository"
+import { removeGameRating, removeGameReview, upsertGameRating } from "./reviews.repository"
 
 export const invalidateGameCache = async(slug:string) => {
 
@@ -25,4 +25,17 @@ export const rateGame = async (
   }
 
   return result?.rating ?? null;
+};
+
+export const deleteRating = async (
+  gameId: string,
+  userId: string
+) => {
+  const result = await removeGameRating(gameId, userId);
+
+  if (result) {
+    await invalidateGameCache(result.slug);
+  }
+
+  return Boolean(result);
 };
