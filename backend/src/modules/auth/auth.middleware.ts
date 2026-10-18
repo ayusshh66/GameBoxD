@@ -7,10 +7,11 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is missing.");
 }
 
-export interface AuthRequest extends Request {
+export interface AuthRequest<
+  P = Record<string, string>
+> extends Request<P> {
   userId?: string;
 }
-
 export const authenticate = async(req:AuthRequest, res:Response, next : NextFunction) => {
 
     try {
