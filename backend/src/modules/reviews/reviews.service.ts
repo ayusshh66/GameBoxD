@@ -82,3 +82,16 @@ export const updateReview = async(
     return result?.review??null ;
 
 }
+
+export const deleteReview = async (
+  reviewId: string,
+  userId: string
+) => {
+  const result = await removeGameReview(reviewId, userId);
+
+  if (result) {
+    await invalidateGameCache(result.slug);
+  }
+
+  return Boolean(result);
+};
