@@ -235,7 +235,7 @@ export const editGameReview = async(
     // we need to fetch slug for redis caching!!!
     const [game] = await tx.select({
       slug: games.slug
-    }).from(games).where(eq(games.id, exisitingReview.gameId)).for("update");
+    }).from(games).where(eq(games.id, exisitingReview.gameId))
 
     if(!game) return null;
 
@@ -284,8 +284,10 @@ export const removeGameReview = async(
 
     if(!deleted) return null;
 
+    await refreshReviewCount(tx,exisitingReview.gameId)
+
     return {
-      reviewEdited : true,
+      reviewDeleted : true,
       review : deleted,
       slug: game.slug
     }
