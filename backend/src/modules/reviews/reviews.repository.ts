@@ -1,7 +1,7 @@
 import { games } from "../../db/schema/games";
 import { reviews, userGameRatings } from "../../db/schema/reviews";
 import { and, desc, eq, sql } from "drizzle-orm";
-import { db } from "../../db/index";
+import { db, users } from "../../db/index";
 
 export const refreshRatingStats = async (tx: any, gameId: string) => {
   const [stats] = await tx
@@ -173,3 +173,41 @@ export const insertGameReview = async(
     })
 
 }
+
+export const findGameReviews = async (
+  gameId: string,
+  limit: number,
+  offset: number
+) => {
+  return db.query.reviews.findMany({
+    where: (reviews, { eq }) => eq(reviews.gameId, gameId),
+
+    columns: {
+      id: true,
+      content: true,
+      isEdited: true,
+      isSpoiler: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+
+    with: {
+      user: {
+        columns: {
+          id: true,
+          username: true,
+          displayName: true,
+          avatarUrl: true,
+        },
+      },
+    },
+
+    orderBy: (reviews, { desc }) => [
+      desc(reviews.createdAt),
+      desc(reviews.id),
+    ],
+
+    limit,
+    offset,
+  });
+};
