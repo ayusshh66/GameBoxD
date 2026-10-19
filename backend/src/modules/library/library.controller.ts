@@ -141,3 +141,94 @@ export const getWishlistController = async (
     next(error);
   }
 };
+
+export const addFavoriteController = async (
+  req: AuthRequest<GameParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const parsed = libraryGameIdSchema.safeParse(
+      req.params.gameId
+    );
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid game ID",
+      });
+    }
+
+    const result = await libraryService.addFavoriteGame(
+      req.userId,
+      parsed.data
+    );
+
+    if (!result) {
+      return res.status(409).json({
+        success: false,
+        message: "Game already exists in favorites",
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Game added to favorites",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteFavoriteController = async (
+  req: AuthRequest<GameParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const parsed = libraryGameIdSchema.safeParse(
+      req.params.gameId
+    );
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid game ID",
+      });
+    }
+
+    const deleted = await libraryService.deleteFavoriteGame(
+      req.userId,
+      parsed.data
+    );
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Game not found in favorites",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Game removed from favorites",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
