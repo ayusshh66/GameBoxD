@@ -1,6 +1,6 @@
 import type { Response, NextFunction } from "express";
-import { createReviewSchema, gameIdSchema, paginationSchema, ratingSchema } from "./reviews.validation";
-import { createGameReview, deleteRating, getGameReviews, rateGame } from "./reviews.service";
+import { createReviewSchema, gameIdSchema, paginationSchema, ratingSchema, reviewIdSchema, updateReviewSchema } from "./reviews.validation";
+import { createGameReview, deleteRating, getGameReviews, rateGame, updateReview } from "./reviews.service";
 import type { AuthRequest } from "../auth/auth.middleware";
 
 export const rateGameController = async (
@@ -179,5 +179,54 @@ export const getGameReviewsController = async (
   } catch (error) {
     console.error("Fetch reviews error:", error);
     return res.status(500).json({ message: "Failed to fetch reviews" });
+  }
+};
+
+export const updateReviewController = async (
+  req: AuthRequest<{reviewId:string}>,
+  res: Response
+) => {
+  const reviewId = req.params.reviewId ;
+
+  if (!reviewIdSchema.safeParse(reviewId).success) {
+    return res.status(400).json({ message: "Invalid review ID" });
+  }
+
+  const parsed = updateReviewSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    return res.status(400).json({
+      message: "Invalid review update",
+      errors: parsed.error.flatten(),
+    });
+  }
+
+  if(!req.userId){
+    return res.status(400).json({
+      success: false,
+      message: "authentication required!"
+    })
+  }
+
+  try {
+    const review = await updateReview(
+      reviewId,
+      req.userId,
+      parsed.data
+    );
+
+    if (!review) {
+      return res.status(404).json({
+        message: "Review not found or not owned by you",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: review,
+    });
+  } catch (error) {
+    console.error("Update review error:", error);
+    return res.status(500).json({ message: "Failed to update review" });
   }
 };
