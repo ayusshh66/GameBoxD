@@ -25,4 +25,22 @@ export const deleteWishlistGame = async (
   return Boolean(result);
 };
 
+export const fetchUserWishlist = async (
+  userId: string,
+  page: number,
+  limit: number
+) => {
+  const offset = (page - 1) * limit;
 
+  const games = await getUserWishlist(
+    userId,
+    limit,
+    offset
+  );
+
+  return {
+    games,
+    page,
+    limit,
+  };
+};
