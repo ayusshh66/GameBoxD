@@ -1,4 +1,4 @@
-import { addToFavorites, addToWishlist, getUserWishlist, removeFromWishlist } from "./library.repository";
+import { addToFavorites, addToWishlist, getUserWishlist, removeFromFavorites, removeFromWishlist } from "./library.repository";
 
 
 export const addWishlistGame = async (
@@ -55,4 +55,16 @@ export const addFavoriteGame = async (
   );
 
   return result;
+};
+
+export const deleteFavoriteGame = async (
+  userId: string,
+  gameId: string
+) => {
+  const result = await removeFromFavorites(
+    userId,
+    gameId
+  );
+
+  return Boolean(result);
 };
