@@ -27,10 +27,14 @@ export const getGames = async (
   next: NextFunction,
 ) => {
   try {
-    const page = Number(req.params.page) || 20;
-    const limit = Math.min(Number(req.params.limit) || 20, 100);
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(
+  Math.max(Number(req.query.limit) || 20, 1),
+  100
+);
 
     const result = await getAllGames(limit, page);
+    console.log("Query received:", req.query);
 
     return res.status(200).json({
       success: true,

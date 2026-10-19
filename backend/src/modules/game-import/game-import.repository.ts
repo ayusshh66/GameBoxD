@@ -1,5 +1,5 @@
 
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../../db";
 import { games, gameSources } from "../../db/schema";
 import type { RawgGame } from "./rawg.client";
@@ -9,9 +9,17 @@ export const saveRawgGame = async (rawg: RawgGame) => {
     const externalId = String(rawg.id);
     const now = new Date();
 
+    // Check whether this RAWG game was imported previously.
     const [existingSource] = await tx
-      .select({ gameId: gameSources.gameId })
+      .select({
+        gameId: gameSources.gameId,
+        slug: games.slug,
+      })
       .from(gameSources)
+      .innerJoin(
+        games,
+        eq(gameSources.gameId, games.id)
+      )
       .where(
         and(
           eq(gameSources.source, "rawg"),
@@ -21,18 +29,24 @@ export const saveRawgGame = async (rawg: RawgGame) => {
       .limit(1);
 
     const releaseDate =
-      rawg.released && /^\d{4}-\d{2}-\d{2}$/.test(rawg.released)
+      rawg.released &&
+      /^\d{4}-\d{2}-\d{2}$/.test(rawg.released)
         ? rawg.released
         : null;
 
     const status =
-      rawg.tba || !releaseDate || releaseDate > now.toISOString().slice(0, 10)
-        ? "upcoming" as const
-        : "released" as const;
+      rawg.tba ||
+      !releaseDate ||
+      releaseDate > now.toISOString().slice(0, 10)
+        ? ("upcoming" as const)
+        : ("released" as const);
 
     const metadata = {
       name: rawg.name,
-      description: rawg.description_raw ?? rawg.description ?? null,
+      description:
+        rawg.description_raw ??
+        rawg.description ??
+        null,
       coverUrl: rawg.background_image ?? null,
       backgroundUrl:
         rawg.background_image_additional ??
@@ -43,6 +57,8 @@ export const saveRawgGame = async (rawg: RawgGame) => {
       metacriticScore: rawg.metacritic ?? null,
       updatedAt: now,
     };
+
+    // CASE 1: GAME ALREADY IMPORTED
 
     if (existingSource) {
       await tx
@@ -64,12 +80,21 @@ export const saveRawgGame = async (rawg: RawgGame) => {
           )
         );
 
-      return { gameId: existingSource.gameId, action: "updated" as const };
+      return {
+        gameId: existingSource.gameId,
+        slug: existingSource.slug,
+        action: "updated" as const,
+      };
     }
 
-    // Reuse an existing game with the same slug if one exists.
+    // CASE 2: NEW RAWG GAME
+
+    // Reuse an existing game if its slug matchese
     const [matchingGame] = await tx
-      .select({ id: games.id })
+      .select({
+        id: games.id,
+        slug: games.slug,
+      })
       .from(games)
       .where(eq(games.slug, rawg.slug))
       .limit(1);
@@ -83,11 +108,20 @@ export const saveRawgGame = async (rawg: RawgGame) => {
           ...metadata,
           slug: rawg.slug,
         })
-        .returning({ id: games.id });
+        .returning({
+          id: games.id,
+        });
 
       gameId = created.id;
+    } else {
+      // Refresh metadata of the existing game
+      await tx
+        .update(games)
+        .set(metadata)
+        .where(eq(games.id, gameId));
     }
 
+    // Connect our internal UUID to the RAWG ID.
     await tx.insert(gameSources).values({
       gameId,
       source: "rawg",
@@ -96,6 +130,12 @@ export const saveRawgGame = async (rawg: RawgGame) => {
       lastSyncedAt: now,
     });
 
-    return { gameId, action: "created" as const };
+    return {
+      gameId,
+      slug: matchingGame?.slug ?? rawg.slug,
+      action: matchingGame
+        ? ("updated" as const)
+        : ("created" as const),
+    };
   });
 };
