@@ -1,6 +1,6 @@
 import type { Response, NextFunction } from "express";
 import { gameIdSchema, ratingSchema } from "./reviews.validation";
-import { rateGame } from "./reviews.service";
+import { deleteRating, rateGame } from "./reviews.service";
 import type { AuthRequest } from "../auth/auth.middleware";
 
 export const rateGameController = async (
@@ -59,5 +59,39 @@ export const rateGameController = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const deleteRatingController = async (
+  req: AuthRequest<{ gameId: string }>,
+  res: Response
+) => {
+  const gameId = req.params.gameId;
+
+  if (!gameIdSchema.safeParse(gameId).success) {
+    return res.status(400).json({ message: "Invalid game ID" });
+  }
+
+  if (!req.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+    });
+  }
+
+  try {
+    const deleted = await deleteRating(gameId, req.userId);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Rating not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Rating deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete rating error:", error);
+    return res.status(500).json({ message: "Failed to delete rating" });
   }
 };
