@@ -1,5 +1,5 @@
-import { and, eq } from "drizzle-orm";
-import { db, userFavorites, userWishlist } from "../../db";
+import { and, desc, eq } from "drizzle-orm";
+import { db, games, userFavorites, userWishlist } from "../../db";
 
 
 export const addToWishlist = async (
@@ -37,33 +37,37 @@ export const getUserWishlist = async (
   limit: number,
   offset: number
 ) => {
-  return db
-    .select({
-      gameId: games.id,
-      name: games.name,
-      slug: games.slug,
-      averageRating: games.averageRating,
-      addedAt: userWishlist.createdAt,
-    })
-    .from(userWishlist)
-    .innerJoin(
-      games,
-      eq(userWishlist.gameId, games.id)
-    )
-    .where(eq(userWishlist.userId, userId))
-    .orderBy(
+  return db.query.userWishlist.findMany({
+    columns: {
+      gameId: true,
+      createdAt: true,
+    },
+
+    with: {
+      game: {
+        columns: {
+          id: true,
+          name: true,
+          slug: true,
+          averageRating: true,
+        },
+      },
+    },
+
+    where: (userWishlist, { eq }) =>
+      eq(userWishlist.userId, userId),
+
+    orderBy: (userWishlist, { desc }) => [
       desc(userWishlist.createdAt),
-      desc(userWishlist.gameId)
-    )
-    .limit(limit)
-    .offset(offset);
+      desc(userWishlist.gameId),
+    ],
+
+    limit,
+    offset,
+  });
 };
 
-// ===============================
-// FAVORITES
-// ===============================
 
-// Add a game to the user's favorites
 export const addToFavorites = async (
   userId: string,
   gameId: string
@@ -93,3 +97,32 @@ export const removeFromFavorites = async (
 
   return deleted ?? null;
 };
+
+export const getUserFavorites  = async(
+    userId:string,
+    limit:number,
+    offset:number
+) => {
+
+    return db.query.userFavorites.findMany({
+        columns : {
+            gameId: true,
+            createdAt: true,
+        },
+        with : {
+            game : {
+                column : {
+                    id:true,
+                    name:true,
+                    slug:true,
+                    averageRating:true,
+                }
+            }
+        },
+        where : (userFavorites,{eq}) => eq(userFavorites.userId, userId),
+        limit,
+        offset,
+
+    })
+
+}
