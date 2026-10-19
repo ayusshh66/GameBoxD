@@ -55,3 +55,48 @@ export const addWishlistController = async (
     next(error);
   }
 };
+
+export const deleteWishlistController = async (
+  req: AuthRequest<GameParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const parsed = libraryGameIdSchema.safeParse(
+      req.params.gameId
+    );
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid game ID",
+      });
+    }
+
+    const deleted = await libraryService.deleteWishlistGame(
+      req.userId,
+      parsed.data
+    );
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Game not found in wishlist",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Game removed from wishlist",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
