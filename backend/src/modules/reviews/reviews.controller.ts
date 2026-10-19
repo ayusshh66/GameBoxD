@@ -1,6 +1,6 @@
 import type { Response, NextFunction } from "express";
-import { gameIdSchema, ratingSchema } from "./reviews.validation";
-import { deleteRating, rateGame } from "./reviews.service";
+import { createReviewSchema, gameIdSchema, paginationSchema, ratingSchema } from "./reviews.validation";
+import { createGameReview, deleteRating, getGameReviews, rateGame } from "./reviews.service";
 import type { AuthRequest } from "../auth/auth.middleware";
 
 export const rateGameController = async (
@@ -95,3 +95,58 @@ export const deleteRatingController = async (
     return res.status(500).json({ message: "Failed to delete rating" });
   }
 };
+
+export const createReviewController = async (
+  req: AuthRequest<{gameId: string}>,
+  res: Response
+) => {
+  const gameId = req.params.gameId;
+
+  if (!gameIdSchema.safeParse(gameId).success) {
+    return res.status(400).json({ message: "Invalid game ID" });
+  }
+
+  const parsed = createReviewSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    return res.status(400).json({
+      message: "Invalid review",
+      errors: parsed.error.flatten(),
+    });
+  }
+
+  if (!req.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+    });
+  }
+
+  try {
+    const result = await createGameReview(
+      gameId,
+      req.userId,
+      parsed.data
+    );
+
+    if (result.status === "game_not_found") {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
+    if (result.status === "already_exists") {
+      return res.status(409).json({
+        message: "You have already reviewed this game",
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Create review error:", error);
+    return res.status(500).json({ message: "Failed to create review" });
+  }
+};
+
+
