@@ -9,7 +9,7 @@ export const addToWishlist = async (
   const [result] = await db
     .insert(userWishlist)
     .values({ userId, gameId })
-    .onConflictDoNothing()
+    .onConflictDoNothing() // do thing bcz, if a user again adds to wishlist then it wont forma  new data set in wishlist
     .returning();
 
   return result ?? null;
