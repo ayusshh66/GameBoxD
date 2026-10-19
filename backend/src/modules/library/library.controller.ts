@@ -100,3 +100,44 @@ export const deleteWishlistController = async (
     next(error);
   }
 };
+
+export const getWishlistController = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const parsed = libraryPaginationSchema.safeParse(
+      req.query
+    );
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid pagination parameters",
+      });
+    }
+
+    const { page, limit } = parsed.data;
+
+    const result = await libraryService.fetchUserWishlist(
+      req.userId,
+      page,
+      limit
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
