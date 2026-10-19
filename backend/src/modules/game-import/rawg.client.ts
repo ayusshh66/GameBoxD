@@ -19,7 +19,7 @@ interface RawgGamesResponse {
   next: string | null;
 }
 
-async function rawgRequest<T>(path: string, params: Record<string, string> = {}): Promise<T> {
+async function rawgRequest<T>(path: string, params: Record<string, string> = {}): Promise<T> { //"<T>" generic type, it is for diff types of promise fucntions
   const apiKey = process.env.RAWG_API_KEY;
 
   if (!apiKey) {
@@ -27,14 +27,14 @@ async function rawgRequest<T>(path: string, params: Record<string, string> = {})
   }
 
   const url = new URL(`${BASE_URL}${path}`);
-  url.searchParams.set("key", apiKey);
+  url.searchParams.set("key", apiKey); // set key value pair in params
 
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
   }
 
   const response = await fetch(url, {
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(15000), // set time out of 15 seconds if a request is done, if it wont resolve in 15 sec then it will throw error
   });
 
   if (!response.ok) {
