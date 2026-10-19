@@ -149,4 +149,35 @@ export const createReviewController = async (
   }
 };
 
+export const getGameReviewsController = async (
+  req: AuthRequest<{gameId:string}>,
+  res: Response
+) => {
+  const gameId = req.params.gameId ;
 
+  if (!gameIdSchema.safeParse(gameId).success) {
+    return res.status(400).json({ message: "Invalid game ID" });
+  }
+
+  const parsed = paginationSchema.safeParse(req.query);
+
+  if (!parsed.success) {
+    return res.status(400).json({ message: "Invalid pagination" });
+  }
+
+  try {
+    const { page, limit } = parsed.data;
+    const data = await getGameReviews(gameId, page, limit);
+
+    return res.status(200).json({
+      success: true,
+      page,
+      limit,
+      count: data.length,
+      data,
+    });
+  } catch (error) {
+    console.error("Fetch reviews error:", error);
+    return res.status(500).json({ message: "Failed to fetch reviews" });
+  }
+};
