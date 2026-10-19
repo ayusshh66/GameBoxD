@@ -1,6 +1,6 @@
 import type { Response, NextFunction } from "express";
 import { createReviewSchema, gameIdSchema, paginationSchema, ratingSchema, reviewIdSchema, updateReviewSchema } from "./reviews.validation";
-import { createGameReview, deleteRating, getGameReviews, rateGame, updateReview } from "./reviews.service";
+import { createGameReview, deleteRating, deleteReview, getGameReviews, rateGame, updateReview } from "./reviews.service";
 import type { AuthRequest } from "../auth/auth.middleware";
 
 export const rateGameController = async (
@@ -228,5 +228,41 @@ export const updateReviewController = async (
   } catch (error) {
     console.error("Update review error:", error);
     return res.status(500).json({ message: "Failed to update review" });
+  }
+};
+
+export const deleteReviewController = async (
+  req: AuthRequest<{reviewId:string}>,
+  res: Response
+) => {
+  const reviewId = req.params.reviewId;
+
+  if (!reviewIdSchema.safeParse(reviewId).success) {
+    return res.status(400).json({ message: "Invalid review ID" });
+  }
+
+  try {
+    if (!req.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+    });
+  }
+
+    const deleted = await deleteReview(reviewId, req.userId);
+
+    if (!deleted) {
+      return res.status(404).json({
+        message: "Review not found or not owned by you",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Review deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete review error:", error);
+    return res.status(500).json({ message: "Failed to delete review" });
   }
 };
