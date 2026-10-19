@@ -1,6 +1,11 @@
-import { fetchRawgGames, fetchRawgGameDetails } from "./rawg.client";
+
+import {
+  fetchRawgGames,
+  fetchRawgGameDetails,
+} from "./rawg.client";
 
 import { saveRawgGame } from "./game-import.repository";
+import { redis } from "../../config/redis";
 
 export const importRawgPage = async (page = 1) => {
   const response = await fetchRawgGames(page, 20);
@@ -11,16 +16,41 @@ export const importRawgPage = async (page = 1) => {
 
   for (const item of response.results) {
     try {
-      // Fetch full details, including description.
+      // Fetch complete information for this game.
       const details = await fetchRawgGameDetails(item.id);
 
+      // Save the game in PostgreSQL.
       const result = await saveRawgGame(details);
 
-      if (result.action === "created") created++;
-      else updated++;
+      // Invalidate stale game details after an update.
+      if (result.action === "updated") {
+        try {
+          const cacheKey =
+            `gameboxd:game:slug:${result.slug}`;
+
+          await redis.del(cacheKey);
+        } catch (cacheError) {
+          // A Redis failure should not undo a successful DB import.
+          console.error(
+            `Cache invalidation failed for ${result.slug}:`,
+            cacheError
+          );
+        }
+      }
+
+      if (result.action === "created") {
+        created++;
+      } else {
+        updated++;
+      }
+
     } catch (error) {
       failed++;
-      console.error(`Failed to import RAWG game ${item.id}`, error);
+
+      console.error(
+        `Failed to import RAWG game ${item.id}:`,
+        error
+      );
     }
   }
 
