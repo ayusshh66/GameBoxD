@@ -1,4 +1,4 @@
-import { addToWishlist } from "./library.repository";
+import { addToWishlist, getUserWishlist, removeFromWishlist } from "./library.repository";
 
 
 export const addWishlistGame = async (
@@ -12,3 +12,17 @@ export const addWishlistGame = async (
 
   return result;
 };
+
+export const deleteWishlistGame = async (
+  userId: string,
+  gameId: string
+) => {
+  const result = await removeFromWishlist(
+    userId,
+    gameId
+  );
+
+  return Boolean(result);
+};
+
+
