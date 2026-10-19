@@ -1,12 +1,11 @@
+
 import type { Response, NextFunction } from "express";
 import type { AuthRequest } from "../auth/auth.middleware";
-
-import * as libraryService from "./library.service";
-
 import {
   libraryGameIdSchema,
   libraryPaginationSchema,
 } from "./library.validation";
+import { addWishlistGame, isMissingGameError, addFavoriteGame, deleteFavoriteGame, deleteWishlistGame, fetchUserWishlist, fetchUserFavorites } from "./library.service";
 
 type GameParams = { gameId: string };
 
@@ -34,7 +33,7 @@ export const addWishlistController = async (
       });
     }
 
-    const result = await libraryService.addWishlistGame(
+    const result = await addWishlistGame(
       req.userId,
       parsed.data
     );
@@ -52,6 +51,13 @@ export const addWishlistController = async (
       data: result,
     });
   } catch (error) {
+    if (isMissingGameError(error)) {
+      return res.status(404).json({
+        success: false,
+        message: "Game not found",
+      });
+    }
+
     next(error);
   }
 };
@@ -80,7 +86,7 @@ export const deleteWishlistController = async (
       });
     }
 
-    const deleted = await libraryService.deleteWishlistGame(
+    const deleted = await deleteWishlistGame(
       req.userId,
       parsed.data
     );
@@ -122,12 +128,13 @@ export const getWishlistController = async (
       return res.status(400).json({
         success: false,
         message: "Invalid pagination parameters",
+        errors: parsed.error.flatten(),
       });
     }
 
     const { page, limit } = parsed.data;
 
-    const result = await libraryService.fetchUserWishlist(
+    const result = await fetchUserWishlist(
       req.userId,
       page,
       limit
@@ -166,7 +173,7 @@ export const addFavoriteController = async (
       });
     }
 
-    const result = await libraryService.addFavoriteGame(
+    const result = await addFavoriteGame(
       req.userId,
       parsed.data
     );
@@ -184,6 +191,13 @@ export const addFavoriteController = async (
       data: result,
     });
   } catch (error) {
+    if (isMissingGameError(error)) {
+      return res.status(404).json({
+        success: false,
+        message: "Game not found",
+      });
+    }
+
     next(error);
   }
 };
@@ -212,7 +226,7 @@ export const deleteFavoriteController = async (
       });
     }
 
-    const deleted = await libraryService.deleteFavoriteGame(
+    const deleted = await deleteFavoriteGame(
       req.userId,
       parsed.data
     );
@@ -254,12 +268,13 @@ export const getFavoritesController = async (
       return res.status(400).json({
         success: false,
         message: "Invalid pagination parameters",
+        errors: parsed.error.flatten(),
       });
     }
 
     const { page, limit } = parsed.data;
 
-    const result = await libraryService.fetchUserFavorites(
+    const result = await fetchUserFavorites(
       req.userId,
       page,
       limit
