@@ -8,6 +8,7 @@ import tagsRouter from "./src/modules/tags/tags.routes";
 import platformRouter from "./src/modules/platforms/platforms.routes";
 import reviewsRoutes from "./src/modules/reviews/reviews.routes";
 import libraryRoutes from "./src/modules/library/library.routes";
+import usersRoutes from "./src/modules/users/users.routes";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -30,6 +31,7 @@ app.use("/api/tags",tagsRouter)
 app.use("/api/platforms",platformRouter)
 app.use("/api", reviewsRoutes);
 app.use("/api", libraryRoutes);
+app.use("/api/users", usersRoutes);
 
 app.listen(PORT, () =>{
 
