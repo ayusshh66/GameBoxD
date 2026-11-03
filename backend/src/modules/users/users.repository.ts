@@ -26,3 +26,35 @@ export const findUserById = async (userId: string) => {
 
   return user ?? null;
 };
+
+export const findUserByUsername = async (
+  username: string
+) => {
+  const [user] = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      displayName: users.displayName,
+      bio: users.bio,
+      avatarUrl: users.avatarUrl,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  return user ?? null;
+};
+
+export const updateUserProfile = async (
+  userId: string,
+  data: UpdateProfileInput
+) => {
+  const [updatedUser] = await db
+    .update(users)
+    .set(data)
+    .where(eq(users.id, userId))
+    .returning(privateFields);
+
+  return updatedUser ?? null;
+};
