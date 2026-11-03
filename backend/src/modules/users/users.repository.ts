@@ -1,8 +1,9 @@
 
-import { eq } from "drizzle-orm";
-import { db } from "../../db";
+import { eq, desc } from "drizzle-orm";
+import { db, games } from "../../db";
 import { users } from "../../db/schema";
 import { count } from "drizzle-orm";
+
 import {
   reviews,
   userGameRatings,
@@ -90,4 +91,29 @@ export const getUserProfileStats = async (userId: string) => {
     ratingsCount: ratingStats[0].count,
     favoritesCount: favoriteStats[0].count,
   };
+};
+
+
+export const getFavoriteGamesPreview = async (userId: string) => {
+  const favoriteGames = await db
+    .select({
+      id: games.id,
+      name: games.name,
+      slug: games.slug,
+      coverUrl: games.coverUrl,
+      averageRating: games.averageRating,
+    })
+    .from(userFavorites)
+    .innerJoin(
+      games,
+      eq(userFavorites.gameId, games.id)
+    )
+    .where(eq(userFavorites.userId, userId))
+    .orderBy(
+      desc(userFavorites.createdAt),
+      desc(userFavorites.gameId)
+    )
+    .limit(4);
+
+  return favoriteGames;
 };
