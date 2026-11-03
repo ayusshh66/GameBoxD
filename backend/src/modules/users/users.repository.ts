@@ -2,6 +2,12 @@
 import { eq } from "drizzle-orm";
 import { db } from "../../db";
 import { users } from "../../db/schema";
+import { count } from "drizzle-orm";
+import {
+  reviews,
+  userGameRatings,
+  userFavorites,
+} from "../../db/schema";
 import type { UpdateProfileInput } from "./users.validation";
 
 const privateFields = {
@@ -57,4 +63,31 @@ export const updateUserProfile = async (
     .returning(privateFields);
 
   return updatedUser ?? null;
+};
+
+
+export const getUserProfileStats = async (userId: string) => {
+
+  const [reviewStats, ratingStats, favoriteStats] =
+    await Promise.all([
+
+      db.select({ count: count() })
+        .from(reviews)
+        .where(eq(reviews.userId, userId)),
+
+      db.select({ count: count() })
+        .from(userGameRatings)
+        .where(eq(userGameRatings.userId, userId)),
+
+      db.select({ count: count() })
+        .from(userFavorites)
+        .where(eq(userFavorites.userId, userId)),
+
+    ]);
+
+  return {
+    reviewsCount: reviewStats[0].count,
+    ratingsCount: ratingStats[0].count,
+    favoritesCount: favoriteStats[0].count,
+  };
 };
