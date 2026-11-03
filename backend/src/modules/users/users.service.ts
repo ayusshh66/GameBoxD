@@ -3,30 +3,36 @@ import * as usersRepository from "./users.repository";
 import type { UpdateProfileInput } from "./users.validation";
 
 export const getMyProfile = async (userId: string) => {
-
   const user = await usersRepository.findUserById(userId);
 
   if (!user) return null;
 
-  const stats = await usersRepository.getUserProfileStats(user.id);
+  const [stats, favoriteGames] = await Promise.all([
+    usersRepository.getUserProfileStats(user.id),
+    usersRepository.getFavoriteGamesPreview(user.id),
+  ]);
 
   return {
     ...user,
     stats,
+    favoriteGames,
   };
 };
 
 export const getPublicProfile = async (username: string) => {
-
   const user = await usersRepository.findUserByUsername(username);
 
   if (!user) return null;
 
-  const stats = await usersRepository.getUserProfileStats(user.id);
+  const [stats, favoriteGames] = await Promise.all([
+    usersRepository.getUserProfileStats(user.id),
+    usersRepository.getFavoriteGamesPreview(user.id),
+  ]);
 
   return {
     ...user,
     stats,
+    favoriteGames,
   };
 };
 
