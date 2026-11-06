@@ -35,3 +35,23 @@ export const removeFollow = async (
   return deleted ?? null;
 };
 
+export const findFollow = async (
+  followerId: string,
+  followingId: string
+) => {
+  const [result] = await db
+    .select({
+      followerId: userFollows.followerId,
+    })
+    .from(userFollows)
+    .where(
+      and(
+        eq(userFollows.followerId, followerId),
+        eq(userFollows.followingId, followingId)
+      )
+    )
+    .limit(1);
+
+  return result ?? null;
+};
+
