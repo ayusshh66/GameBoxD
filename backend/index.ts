@@ -3,6 +3,7 @@ import cookieParse from "cookie-parser";
 import cors from 'cors'
 import authRouter from "./src/modules/auth/auth.routes"
 import gameRouter from "./src/modules/games/games.routes"
+import feedRoutes from "./src/modules/feed/feed.routes";
 import genreRouter from "./src/modules/genres/genres.routes";
 import tagsRouter from "./src/modules/tags/tags.routes";
 import platformRouter from "./src/modules/platforms/platforms.routes";
@@ -35,6 +36,7 @@ app.use("/api", libraryRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/users", followsRoutes);
+app.use("/api/feed", feedRoutes);
 
 app.listen(PORT, () =>{
 
