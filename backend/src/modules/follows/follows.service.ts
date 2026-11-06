@@ -28,3 +28,30 @@ export const followUser = async (
 
   return { status: "followed" } as const;
 };
+
+// Unfollow a user
+export const unfollowUser = async (
+  currentUserId: string,
+  username: string
+) => {
+  const target = await findUserByUsername(username);
+
+  if (!target) {
+    return { status: "not_found" } as const;
+  }
+
+  if (currentUserId === target.id) {
+    return { status: "self_follow" } as const;
+  }
+
+  const result = await followsRepository.removeFollow(
+    currentUserId,
+    target.id
+  );
+
+  if (!result) {
+    return { status: "not_following" } as const;
+  }
+
+  return { status: "unfollowed" } as const;
+};
