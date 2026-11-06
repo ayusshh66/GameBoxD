@@ -97,3 +97,30 @@ export const fetchFollowing = async (
 
   return { users, page, limit };
 };
+
+// Check follow status
+export const getFollowStatus = async (
+  currentUserId: string,
+  username: string
+) => {
+  const target = await findUserByUsername(username);
+
+  if (!target) return null;
+
+  if (currentUserId === target.id) {
+    return {
+      isFollowing: false,
+      isOwnProfile: true,
+    };
+  }
+
+  const follow = await followsRepository.findFollow(
+    currentUserId,
+    target.id
+  );
+
+  return {
+    isFollowing: Boolean(follow),
+    isOwnProfile: false,
+  };
+};
