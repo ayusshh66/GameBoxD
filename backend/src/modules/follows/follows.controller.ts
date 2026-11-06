@@ -225,3 +225,49 @@ export const getFollowingController = async (
     next(error);
   }
 };
+
+// GET - Follow status
+export const getFollowStatusController = async (
+  req: AuthRequest<UsernameParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const username = usernameSchema.safeParse(
+      req.params.username
+    );
+
+    if (!username.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid username",
+      });
+    }
+
+    const result = await followsService.getFollowStatus(
+      req.userId,
+      username.data
+    );
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
