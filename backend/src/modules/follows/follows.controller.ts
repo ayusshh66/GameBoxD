@@ -73,3 +73,63 @@ export const followUserController = async (
     next(error);
   }
 };
+
+// DELETE - Unfollow user
+export const unfollowUserController = async (
+  req: AuthRequest<UsernameParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const parsed = usernameSchema.safeParse(
+      req.params.username
+    );
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid username",
+      });
+    }
+
+    const result = await followsService.unfollowUser(
+      req.userId,
+      parsed.data
+    );
+
+    switch (result.status) {
+      case "not_found":
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+
+      case "self_follow":
+        return res.status(400).json({
+          success: false,
+          message: "You cannot unfollow yourself",
+        });
+
+      case "not_following":
+        return res.status(404).json({
+          success: false,
+          message: "You are not following this user",
+        });
+
+      case "unfollowed":
+        return res.status(200).json({
+          success: true,
+          message: "User unfollowed successfully",
+        });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
