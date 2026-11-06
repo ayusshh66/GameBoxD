@@ -1,68 +1,32 @@
 
-import { and, desc, eq } from "drizzle-orm";
+import * as feedRepository from "./feed.repository";
 
-import {
-  db,
-  userFollows,
-  reviews,
-  users,
-  games,
-} from "../../db";
-
-export const getFollowingReviews = async (
+export const getFollowingFeed = async (
   userId: string,
-  limit: number,
-  offset: number
+  page: number,
+  limit: number
 ) => {
-  const result = await db
-    .select({
-      id: reviews.id,
-      content: reviews.content,
-      isSpoiler: reviews.isSpoiler,
-      isEdited: reviews.isEdited,
-      createdAt: reviews.createdAt,
-      updatedAt: reviews.updatedAt,
+  const offset = (page - 1) * limit;
 
-      author: {
-        id: users.id,
-        username: users.username,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
-      },
+  const reviews = await feedRepository.getFollowingReviews(
+    userId,
+    limit,
+    offset
+  );
 
-      game: {
-        id: games.id,
-        name: games.name,
-        slug: games.slug,
-        coverUrl: games.coverUrl,
-      },
-    })
-    .from(reviews)
+  const hasMore = reviews.length > limit;
 
-    .innerJoin(
-      userFollows,
-      and(
-        eq(userFollows.followingId, reviews.userId),
-        eq(userFollows.followerId, userId)
-      )
-    )
+  const activities = reviews
+    .slice(0, limit)
+    .map((review) => ({
+      type: "review" as const,
+      ...review,
+    }));
 
-    .innerJoin(
-      users,
-      eq(reviews.userId, users.id)
-    )
-
-    .innerJoin(
-      games,
-      eq(reviews.gameId, games.id)
-    )
-
-    .orderBy(
-      desc(reviews.createdAt),
-      desc(reviews.id)
-    )
-    .limit(limit + 1)
-    .offset(offset);
-
-  return result;
+  return {
+    activities,
+    page,
+    limit,
+    hasMore,
+  };
 };
