@@ -179,3 +179,49 @@ export const getFollowersController = async (
     next(error);
   }
 };
+
+// GET - Following
+export const getFollowingController = async (
+  req: Request<UsernameParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const username = usernameSchema.safeParse(
+      req.params.username
+    );
+
+    const pagination = followPaginationSchema.safeParse(
+      req.query
+    );
+
+    if (!username.success || !pagination.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request parameters",
+      });
+    }
+
+    const { page, limit } = pagination.data;
+
+    const result = await followsService.fetchFollowing(
+      username.data,
+      page,
+      limit
+    );
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
