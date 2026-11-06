@@ -6,6 +6,7 @@ import gameRouter from "./src/modules/games/games.routes"
 import genreRouter from "./src/modules/genres/genres.routes";
 import tagsRouter from "./src/modules/tags/tags.routes";
 import platformRouter from "./src/modules/platforms/platforms.routes";
+import followsRoutes from "./src/modules/follows/follows.routes";
 import reviewsRoutes from "./src/modules/reviews/reviews.routes";
 import libraryRoutes from "./src/modules/library/library.routes";
 import usersRoutes from "./src/modules/users/users.routes";
@@ -32,6 +33,8 @@ app.use("/api/platforms",platformRouter)
 app.use("/api", reviewsRoutes);
 app.use("/api", libraryRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/users", usersRoutes);
+app.use("/api/users", followsRoutes);
 
 app.listen(PORT, () =>{
 

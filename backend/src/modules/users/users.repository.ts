@@ -8,6 +8,7 @@ import {
   reviews,
   userGameRatings,
   userFavorites,
+  userFollows
 } from "../../db/schema";
 import type { UpdateProfileInput } from "./users.validation";
 
@@ -67,31 +68,45 @@ export const updateUserProfile = async (
 };
 
 
+
 export const getUserProfileStats = async (userId: string) => {
+  const [
+    reviewStats,
+    ratingStats,
+    favoriteStats,
+    followerStats,
+    followingStats,
+  ] = await Promise.all([
+    db.select({ count: count() })
+      .from(reviews)
+      .where(eq(reviews.userId, userId)),
 
-  const [reviewStats, ratingStats, favoriteStats] =
-    await Promise.all([
+    db.select({ count: count() })
+      .from(userGameRatings)
+      .where(eq(userGameRatings.userId, userId)),
 
-      db.select({ count: count() })
-        .from(reviews)
-        .where(eq(reviews.userId, userId)),
+    db.select({ count: count() })
+      .from(userFavorites)
+      .where(eq(userFavorites.userId, userId)),
 
-      db.select({ count: count() })
-        .from(userGameRatings)
-        .where(eq(userGameRatings.userId, userId)),
+    db.select({ count: count() })
+      .from(userFollows)
+      .where(eq(userFollows.followingId, userId)),
 
-      db.select({ count: count() })
-        .from(userFavorites)
-        .where(eq(userFavorites.userId, userId)),
-
-    ]);
+    db.select({ count: count() })
+      .from(userFollows)
+      .where(eq(userFollows.followerId, userId)),
+  ]);
 
   return {
     reviewsCount: reviewStats[0].count,
     ratingsCount: ratingStats[0].count,
     favoritesCount: favoriteStats[0].count,
+    followersCount: followerStats[0].count,
+    followingCount: followingStats[0].count,
   };
 };
+
 
 
 export const getFavoriteGamesPreview = async (userId: string) => {
