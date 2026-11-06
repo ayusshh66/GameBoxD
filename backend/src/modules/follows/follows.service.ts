@@ -55,7 +55,7 @@ export const unfollowUser = async (
 
   return { status: "unfollowed" } as const;
 };
-    
+
 // Get followers
 export const fetchFollowers = async (
   username: string,
@@ -69,6 +69,27 @@ export const fetchFollowers = async (
   const offset = (page - 1) * limit;
 
   const users = await followsRepository.getFollowers(
+    target.id,
+    limit,
+    offset
+  );
+
+  return { users, page, limit };
+};
+
+// Get following
+export const fetchFollowing = async (
+  username: string,
+  page: number,
+  limit: number
+) => {
+  const target = await findUserByUsername(username);
+
+  if (!target) return null;
+
+  const offset = (page - 1) * limit;
+
+  const users = await followsRepository.getFollowing(
     target.id,
     limit,
     offset
