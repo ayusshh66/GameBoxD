@@ -55,7 +55,6 @@ export const findFollow = async (
   return result ?? null;
 };
 
-
 export const getFollowers = async (
   userId: string,
   limit: number,
@@ -79,6 +78,34 @@ export const getFollowers = async (
     .orderBy(
       desc(userFollows.createdAt),
       desc(userFollows.followerId)
+    )
+    .limit(limit)
+    .offset(offset);
+};
+
+export const getFollowing = async (
+  userId: string,
+  limit: number,
+  offset: number
+) => {
+  return db
+    .select({
+      id: users.id,
+      username: users.username,
+      displayName: users.displayName,
+      avatarUrl: users.avatarUrl,
+      bio: users.bio,
+      followedAt: userFollows.createdAt,
+    })
+    .from(userFollows)
+    .innerJoin(
+      users,
+      eq(userFollows.followingId, users.id)
+    )
+    .where(eq(userFollows.followerId, userId))
+    .orderBy(
+      desc(userFollows.createdAt),
+      desc(userFollows.followingId)
     )
     .limit(limit)
     .offset(offset);
