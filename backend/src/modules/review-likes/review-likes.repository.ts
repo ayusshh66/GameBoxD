@@ -27,6 +27,16 @@ export const addReviewLike = async (
   return result ?? null;
 };
 
-//changing github user in system
+//unlike a review 
+export const removeReviewLike = async(
+  userId:string,
+  reviewId:string,
+) => {
+  const [deleted] = await db.delete(reviewLikes).where(
+    and(eq(reviewLikes.reviewId, reviewId), eq(reviewLikes.userId, userId))
+  ).returning()
+
+  return deleted ?? null;
+}
 
 
