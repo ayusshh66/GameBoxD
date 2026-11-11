@@ -41,3 +41,18 @@ export const unlikeReview = async (
     ? ("unliked" as const)
     : ("not_liked" as const);
 };
+
+//func to get reviews
+export const getReviewLikes = async (
+  reviewId: string
+) => {
+  const review = await repository.findReview(reviewId);
+
+  if (!review) return null;
+
+  const likesCount = await repository.countReviewLikes(
+    reviewId
+  );
+
+  return { likesCount };
+};
