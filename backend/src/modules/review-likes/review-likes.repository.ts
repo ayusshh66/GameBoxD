@@ -51,4 +51,21 @@ export const countReviewLikes = async (
   return result.total;
 };
 
+// Check if a specific user liked a review
+export const findUserReviewLike = async (
+  userId: string,
+  reviewId: string
+) => {
+  const [result] = await db
+    .select({ userId: reviewLikes.userId })
+    .from(reviewLikes)
+    .where(
+      and(
+        eq(reviewLikes.userId, userId),
+        eq(reviewLikes.reviewId, reviewId)
+      )
+    )
+    .limit(1);
 
+  return result ?? null;
+};
