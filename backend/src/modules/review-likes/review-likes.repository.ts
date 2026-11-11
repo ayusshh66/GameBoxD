@@ -39,4 +39,16 @@ export const removeReviewLike = async(
   return deleted ?? null;
 }
 
+// Total likes on a review
+export const countReviewLikes = async (
+  reviewId: string
+) => {
+  const [result] = await db
+    .select({ total: count() })
+    .from(reviewLikes)
+    .where(eq(reviewLikes.reviewId, reviewId));
+
+  return result.total;
+};
+
 
