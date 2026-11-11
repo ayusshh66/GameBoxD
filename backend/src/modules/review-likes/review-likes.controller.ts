@@ -115,3 +115,41 @@ export const unlikeReviewController = async (
     next(error);
   }
 };
+
+// GET - Total review likes (public)
+export const getReviewLikesController = async (
+  req: Request<ReviewParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const parsed = reviewIdSchema.safeParse(
+      req.params.reviewId
+    );
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid review ID",
+      });
+    }
+
+    const result = await service.getReviewLikes(
+      parsed.data
+    );
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
