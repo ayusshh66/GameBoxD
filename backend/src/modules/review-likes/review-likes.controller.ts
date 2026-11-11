@@ -1,3 +1,4 @@
+
 import type {
   Request,
   Response,
@@ -135,6 +136,52 @@ export const getReviewLikesController = async (
     }
 
     const result = await service.getReviewLikes(
+      parsed.data
+    );
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET - Logged-in user's like status
+export const getReviewLikeStatusController = async (
+  req: AuthRequest<ReviewParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const parsed = reviewIdSchema.safeParse(
+      req.params.reviewId
+    );
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid review ID",
+      });
+    }
+
+    const result = await service.getReviewLikeStatus(
+      req.userId,
       parsed.data
     );
 
