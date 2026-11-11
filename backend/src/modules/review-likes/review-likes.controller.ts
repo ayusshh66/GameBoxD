@@ -62,3 +62,56 @@ export const likeReviewController = async (
     next(error);
   }
 };
+
+// DELETE - Unlike review
+export const unlikeReviewController = async (
+  req: AuthRequest<ReviewParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const parsed = reviewIdSchema.safeParse(
+      req.params.reviewId
+    );
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid review ID",
+      });
+    }
+
+    const result = await service.unlikeReview(
+      req.userId,
+      parsed.data
+    );
+
+    if (result === "review_not_found") {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found",
+      });
+    }
+
+    if (result === "not_liked") {
+      return res.status(404).json({
+        success: false,
+        message: "You haven't liked this review",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Review unliked successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
