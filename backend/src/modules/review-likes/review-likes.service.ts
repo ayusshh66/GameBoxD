@@ -56,3 +56,23 @@ export const getReviewLikes = async (
 
   return { likesCount };
 };
+
+//function to get review liek statusgit 
+export const getReviewLikeStatus = async (
+  userId: string,
+  reviewId: string
+) => {
+  const review = await repository.findReview(reviewId);
+
+  if (!review) return null;
+
+  const [likesCount, existingLike] = await Promise.all([
+    repository.countReviewLikes(reviewId),
+    repository.findUserReviewLike(userId, reviewId),
+  ]);
+
+  return {
+    likesCount,
+    isLiked: Boolean(existingLike),
+  };
+};
