@@ -11,6 +11,7 @@ import followsRoutes from "./src/modules/follows/follows.routes";
 import reviewsRoutes from "./src/modules/reviews/reviews.routes";
 import libraryRoutes from "./src/modules/library/library.routes";
 import usersRoutes from "./src/modules/users/users.routes";
+import reviewLikesRoutes from "./src/modules/review-likes/review-likes.routes";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -37,6 +38,7 @@ app.use("/api/users", usersRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/users", followsRoutes);
 app.use("/api/feed", feedRoutes);
+app.use("/api/reviews", reviewLikesRoutes);
 
 app.listen(PORT, () =>{
 
