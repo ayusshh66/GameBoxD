@@ -53,3 +53,11 @@ export const fetchRawgGames = (page: number, pageSize = 20) =>
 
 export const fetchRawgGameDetails = (id: number) =>
   rawgRequest<RawgGame>(`/games/${id}`);
+
+export const fetchRawgSearch = (query: string, page: number, pageSize = 24) =>
+  rawgRequest<RawgGamesResponse>("/games", {
+    search: query,
+    page: String(page),
+    page_size: String(pageSize),
+  });
+
