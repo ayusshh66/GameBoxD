@@ -27,13 +27,17 @@ export const refreshRatingStats = async (
     .where(eq(games.id, gameId));
 };
 
-export const refreshReviewCount = async (tx: any, gameId: string) => {
+
+export const refreshReviewCount = async (
+  tx: any,
+  gameId: string
+) => {
   const [stats] = await tx
     .select({
       count: sql<number>`COUNT(*)::integer`,
     })
     .from(reviews)
-    .when(eq(reviews.gameId, gameId));
+    .where(eq(reviews.gameId, gameId));
 
   await tx
     .update(games)
@@ -42,6 +46,7 @@ export const refreshReviewCount = async (tx: any, gameId: string) => {
     })
     .where(eq(games.id, gameId));
 };
+
 
 export const upsertGameRating = async (
   gameId: string,
