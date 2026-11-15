@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { backendGet, type LocalGame } from "@/lib/discover-data";
 import GameDetailView from "@/components/games/game-detail-view";
-import { EMPTY_EXTRA, type PageExtra } from "@/components/games/game-detail-types";
+import { EMPTY_EXTRA, type PageExtra } from "@/components/games/game-detail-types"
 
 export default async function LocalGamePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

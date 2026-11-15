@@ -20,7 +20,7 @@ export const refreshRatingStats = async (tx: any, gameId: string) => {
       averageRating: stats.average,
       ratingCount: stats.count,
     })
-    .when(eq(games.id, gameId));
+    .where(eq(games.id, gameId));
 };
 
 export const refreshReviewCount = async (tx: any, gameId: string) => {
@@ -116,63 +116,66 @@ export const removeGameRating = async(
 
 }
 
-export const insertGameReview = async(
-    gameId:string,
-    userId:string,
-    data: {
-        content: string,
-        isSpoiler: boolean,
-    }
+
+export const insertGameReview = async (
+  gameId: string,
+  userId: string,
+  data: {
+    content: string;
+    isSpoiler: boolean;
+  }
 ) => {
+  return db.transaction(async (tx) => {
+    const [gameData] = await tx
+      .select({
+        id: games.id,
+        slug: games.slug,
+      })
+      .from(games)
+      .where(eq(games.id, gameId))
+      .for("update");
 
-    return db.transaction(async(tx) => {
+    if (!gameData) {
+      return { status: "game_not_found" as const };
+    }
 
-        const [gameData] = await tx.select({
-            id:games.id,
-            slug:games.slug
-        }).from(games).where(
-            eq(
-                games.id, gameId
-            )
-        ).for("update")
+    const [existingReview] = await tx
+      .select({
+        id: reviews.id,
+      })
+      .from(reviews)
+      .where(
+        and(
+          eq(reviews.gameId, gameId),
+          eq(reviews.userId, userId)
+        )
+      )
+      .limit(1);
 
-        const [exisitingUser] = await tx.select({
-            id:reviews.id
-        }).from(reviews).where(
-            and(
-                eq(
-                    reviews.gameId, gameId,
-                ),
-                eq(
-                    reviews.userId, userId
-                )
-            )
-        ).limit(1);
+    if (existingReview) {
+      return { status: "already_exists" as const };
+    }
 
-        if(exisitingUser){
-            return {
-                message: "review already existed, please update it" 
-            }
-        }
+    const [inserted] = await tx
+      .insert(reviews)
+      .values({
+        gameId,
+        userId,
+        content: data.content,
+        isSpoiler: data.isSpoiler,
+      })
+      .returning();
 
-        const [insert] = await tx.insert(reviews).values({
-            gameId,
-            userId,
-            content: data.content,
-            isSpoiler: data.isSpoiler,
-        }).returning();
+    await refreshReviewCount(tx, gameId);
 
-        await refreshReviewCount(tx, gameId);
+    return {
+      status: "created" as const,
+      data: inserted,
+      slug: gameData.slug,
+    };
+  });
+};
 
-        return {
-            status : "created",
-            data : insert,
-            slug: gameData.slug
-        }
-
-    })
-
-}
 
 export const findGameReviews = async (
   gameId: string,
