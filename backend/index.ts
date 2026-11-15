@@ -12,6 +12,8 @@ import reviewsRoutes from "./src/modules/reviews/reviews.routes";
 import libraryRoutes from "./src/modules/library/library.routes";
 import usersRoutes from "./src/modules/users/users.routes";
 import reviewLikesRoutes from "./src/modules/review-likes/review-likes.routes";
+import catalogRoutes from "./src/modules/games/catalog.routes";
+
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -28,6 +30,8 @@ app.get("/", async(req: Request, res: Response) => {
 })
 
 app.use("/api/auth", authRouter)
+app.use("/api/games", catalogRoutes);
+app.use("/api/games", gameRouter);
 app.use("/api/games",gameRouter)
 app.use("/api/genres",genreRouter)
 app.use("/api/tags",tagsRouter)
