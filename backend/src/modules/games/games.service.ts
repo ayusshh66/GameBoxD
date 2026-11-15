@@ -59,7 +59,7 @@ export const getTopGames = async (limit: number) => {
 
   const games =  await findTopGames(limit);
 
-  await redis.set(cachedKey, JSON.stringify(cachedGame),"EX",300);
+  await redis.set(cachedKey, JSON.stringify(games), "EX", 300)
 
   return games;
 };
@@ -289,7 +289,7 @@ export const increaseDailyTrendingScore = async(gameId:string, point : 1) => {
 
 export const getDailyTrendingScore = async(limit:number) => {
 
-  const today = new Date().toDateString().slice(0,10);
+  const today = new Date().toISOString().slice(0,10);
 
   const result = await redis.zrevrange(
     `gameboxd:trending:${today}`,
