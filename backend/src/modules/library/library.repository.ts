@@ -101,31 +101,39 @@ export const removeFromFavorites = async (
   return deleted ?? null;
 };
 
-export const getUserFavorites  = async(
-    userId:string,
-    limit:number,
-    offset:number
+
+export const getUserFavorites = async (
+  userId: string,
+  limit: number,
+  offset: number
 ) => {
+  return db.query.userFavorites.findMany({
+    columns: {
+      gameId: true,
+      createdAt: true,
+    },
 
-    return db.query.userFavorites.findMany({
-        columns : {
-            gameId: true,
-            createdAt: true,
+    with: {
+      game: {
+        columns: {
+          id: true,
+          name: true,
+          slug: true,
+          coverUrl: true,
+          averageRating: true,
         },
-        with : {
-            game : {
-                column : {
-                    id:true,
-                    name:true,
-                    slug:true,
-                    averageRating:true,
-                }
-            }
-        },
-        where : (userFavorites,{eq}) => eq(userFavorites.userId, userId),
-        limit,
-        offset,
+      },
+    },
 
-    })
+    where: (userFavorites, { eq }) =>
+      eq(userFavorites.userId, userId),
 
-}
+    orderBy: (userFavorites, { desc }) => [
+      desc(userFavorites.createdAt),
+      desc(userFavorites.gameId),
+    ],
+
+    limit,
+    offset,
+  });
+};
