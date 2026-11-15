@@ -224,9 +224,46 @@ export default function AuthForm({ mode }: Props) {
                   </p>
                 )}
 
-                <button type="submit" disabled={loading} className="auth-submit">
-                  {loading ? "Please wait..." : isSignup ? "Create my account" : "Log in to GameboxD"}
-                  {!loading && <ArrowRight className="size-5" />}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="auth-submit auth-flow-button"
+                  onPointerMove={(event) => {
+                    const bounds = event.currentTarget.getBoundingClientRect();
+                    event.currentTarget.style.setProperty(
+                      "--flow-x", `${event.clientX - bounds.left}px`
+                    );
+                    event.currentTarget.style.setProperty(
+                      "--flow-y", `${event.clientY - bounds.top}px`
+                    );
+                  }}
+                >
+                  <span className="auth-flow-button__wash" aria-hidden="true" />
+                  <span className="auth-flow-button__content">
+                    {loading ? (
+                      <span aria-hidden="true" />
+                    ) : (
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="auth-flow-button__arrow auth-flow-button__arrow--start"
+                      />
+                    )}
+                    <span>
+                      {loading
+                        ? "Please wait..."
+                        : isSignup
+                          ? "Create my account"
+                          : "Log in to GameboxD"}
+                    </span>
+                    {loading ? (
+                      <span aria-hidden="true" />
+                    ) : (
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="auth-flow-button__arrow auth-flow-button__arrow--end"
+                      />
+                    )}
+                  </span>
                 </button>
                 {isSignup && (
                   <p className="text-center text-xs leading-5 text-[#8EA4A4]">
