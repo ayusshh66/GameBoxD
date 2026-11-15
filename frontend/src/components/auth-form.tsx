@@ -1,18 +1,22 @@
-
 "use client";
 
-import { useState } from "react";
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
+import {
+  ArrowRight,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Gamepad2,
+  LockKeyhole,
+  Radio,
+} from "lucide-react";
 import { apiRequest } from "@/lib/api";
 
-type AuthMode = "login" | "signup";
+type Mode = "login" | "signup";
 
-type Props = {
-  mode: AuthMode;
-};
+type Props = { mode: Mode };
 
 export default function AuthForm({ mode }: Props) {
   const router = useRouter();
@@ -21,57 +25,41 @@ export default function AuthForm({ mode }: Props) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [registered, setRegistered] = useState(false);
 
-  const inputClass =
-    "w-full rounded-xl border border-[#292D3A] " +
-    "bg-[#141720] px-4 py-3 text-white " +
-    "placeholder:text-[#7A8593] " +
-    "outline-none transition " +
-    "focus:border-[#3D5AFE] focus:ring-2 " +
-    "focus:ring-[#3D5AFE]/20";
-
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (loading) return;
 
-    setLoading(true);
     setError("");
+    setLoading(true);
 
     try {
       if (isSignup) {
-        await apiRequest("/api/auth/register", {
-          method: "POST",
-          body: {
-            username,
-            email,
-            password,
-          },
-        });
-
+        await apiRequest<{ id: string; username: string; email: string }>(
+          "/api/auth/register",
+          {
+            method: "POST",
+            body: { username, email, password },
+          }
+        );
         setRegistered(true);
       } else {
-        await apiRequest("/api/auth/login", {
+        await apiRequest<string>("/api/auth/login", {
           method: "POST",
-          body: {
-            email,
-            password,
-          },
+          body: { email, password },
         });
-
+        // Express sets an HttpOnly JWT cookie in the response.
+        // With the Next.js /api rewrite, the browser stores it normally.
         router.replace("/discover");
         router.refresh();
       }
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again."
+        err instanceof Error ? err.message : "Something went wrong. Try again."
       );
     } finally {
       setLoading(false);
@@ -79,240 +67,192 @@ export default function AuthForm({ mode }: Props) {
   }
 
   return (
-    <main className="grid min-h-screen bg-[#0A0B10] text-white lg:grid-cols-2">
-      {/* Left: Form */}
-      <section className="flex min-h-screen flex-col px-6 py-8 sm:px-12 lg:px-20">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-xl font-bold tracking-tight"
-        >
-          <span className="h-3 w-3 rounded-sm bg-[#15FFB5]" />
-          GameboxD
+    <main className="grid min-h-dvh grid-cols-1 bg-[#011717] text-[#F0F7F6] lg:grid-cols-2">
+      {/* Brand panel */}
+      <section className="relative hidden min-h-dvh flex-col justify-between border-r border-[#163F43]/55 bg-[#021A18] px-10 py-12 lg:flex xl:px-14 xl:py-14">
+        <Link href="/" className="relative z-10 flex w-fit items-center gap-3" aria-label="GameboxD home">
+          <span className="flex size-12 items-center justify-center rounded-[4px] bg-[#FC521E] text-[#011717]">
+            <Gamepad2 className="size-6" strokeWidth={2.2} />
+          </span>
+          <span className="font-mono text-sm font-bold tracking-[0.27em]">GAMEBOXD</span>
         </Link>
 
-        <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-12">
-          {registered ? (
-            <div className="space-y-5">
-              <div className="text-4xl text-[#15FFB5]">
-                ✓
+        <div className="relative z-10 max-w-[580px] py-14">
+          <p className="mb-8 font-display text-xs font-bold uppercase tracking-[0.25em] text-[#D4E7E4]">
+            The player&apos;s diary
+          </p>
+          <h1 className="max-w-[550px] font-display text-[clamp(2.8rem,4.15vw,5rem)] font-bold leading-[1.04] tracking-[-0.055em]">
+            Track what you play. Remember how it felt.
+          </h1>
+          <p className="mt-8 max-w-[530px] text-base leading-8 text-[#8EAFA9] xl:text-lg">
+            A living archive for your backlog, your ratings, and the games
+            that stay with you long after the credits.
+          </p>
+          <div className="mt-12 grid grid-cols-3 gap-3">
+            {[
+              { value: "01", caption: "Log games", highlight: true },
+              { value: "02", caption: "Share reviews" },
+              { value: "03", caption: "Find your people" },
+            ].map((item) => (
+              <div key={item.value} className="min-h-28 rounded-[4px] border border-[#163F43] bg-[#001411]/40 p-4">
+                <p className={`font-display text-2xl font-bold ${item.highlight ? "text-[#FC521E]" : "text-[#F0F7F6]"}`}>
+                  {item.value}
+                </p>
+                <p className="mt-3 text-[11px] font-semibold uppercase leading-4 tracking-[0.13em] text-[#8EA4A4]">
+                  {item.caption}
+                </p>
               </div>
+            ))}
+          </div>
+        </div>
 
-              <h1 className="text-3xl font-bold">
-                Account created!
-              </h1>
+        <div className="relative z-10 flex items-end justify-between gap-5 border-t border-[#163F43]/65 pt-6">
+          <p className="max-w-[350px] text-sm leading-6 text-[#8EA4A4]">
+            “The best games become part of your personal mythology.”
+          </p>
+          <span className="flex shrink-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[#8EA4A4]">
+            <Radio className="size-3" /> Signal online
+          </span>
+        </div>
+      </section>
 
-              <p className="text-[#B0BEC5]">
-                Your GameboxD account is ready.
-                Sign in to start exploring.
+      {/* Authentication panel */}
+      <section className="flex min-h-dvh items-center justify-center bg-[#001310] px-6 py-10 sm:px-10 lg:px-12 xl:px-16">
+        <div className="w-full max-w-[525px]">
+          <div className="mb-12 flex items-center gap-3 lg:hidden">
+            <span className="flex size-10 items-center justify-center rounded-[4px] bg-[#FC521E] text-[#011717]">
+              <Gamepad2 className="size-5" />
+            </span>
+            <span className="font-mono text-xs font-bold tracking-[0.27em]">GAMEBOXD</span>
+          </div>
+
+          {registered ? (
+            <div className="space-y-5" role="status">
+              <CheckCircle2 className="size-11 text-[#87B683]" />
+              <h2 className="font-display text-4xl font-bold tracking-[-0.045em]">
+                Save file created.
+              </h2>
+              <p className="text-[#8EA4A4]">
+                Your account is ready. Log in to enter the archive.
               </p>
-
-              <Link
-                href="/login"
-                className="inline-block rounded-xl bg-[#3D5AFE] px-6 py-3 font-semibold text-white transition hover:bg-[#3048D9]"
-              >
-                Continue to Login
+              <Link href="/login" className="auth-submit mt-5 no-underline">
+                Log in to GameboxD <ArrowRight className="size-4" />
               </Link>
             </div>
           ) : (
             <>
-              <div className="mb-9 space-y-3">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#15FFB5]">
-                  {isSignup
-                    ? "Join the community"
-                    : "Welcome back"}
+              <header className="mb-9">
+                <p className="mb-5 font-mono text-xs font-bold uppercase tracking-[0.21em] text-[#FC521E]">
+                  {isSignup ? "New player detected" : "Welcome back, player"}
                 </p>
-
-                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                <h2 className="font-display text-[clamp(2rem,3vw,3rem)] font-bold leading-tight tracking-[-0.055em]">
+                  {isSignup ? "Make your mark." : "Enter the archive."}
+                </h2>
+                <p className="mt-4 text-sm leading-6 text-[#8EA4A4] sm:text-base">
                   {isSignup
-                    ? "Create your account."
-                    : "Welcome back, gamer."}
-                </h1>
-
-                <p className="text-[#B0BEC5]">
-                  {isSignup
-                    ? "Discover games, share reviews and connect with gamers."
-                    : "Sign in to continue your gaming journey."}
+                    ? "Create your record and start collecting your gaming stories."
+                    : "Log in to continue your journey, or make a new record."}
                 </p>
-              </div>
+              </header>
 
-              <form
-                onSubmit={handleSubmit}
-                className="space-y-5"
-              >
+              <nav aria-label="Authentication" className="mb-9 grid grid-cols-2 rounded-[4px] bg-[#06211E] p-1">
+                <Link
+                  href="/login"
+                  aria-current={!isSignup ? "page" : undefined}
+                  className={`rounded-[3px] px-3 py-3 text-center text-sm font-medium transition-colors ${!isSignup ? "bg-[#001310] text-[#F0F7F6]" : "text-[#A4BDB8] hover:text-white"}`}
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/signup"
+                  aria-current={isSignup ? "page" : undefined}
+                  className={`rounded-[3px] px-3 py-3 text-center text-sm font-medium transition-colors ${isSignup ? "bg-[#001310] text-[#F0F7F6]" : "text-[#A4BDB8] hover:text-white"}`}
+                >
+                  Create account
+                </Link>
+              </nav>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
                 {isSignup && (
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="username"
-                      className="text-sm font-medium"
-                    >
-                      Username
-                    </label>
-
+                  <div>
+                    <label className="auth-label" htmlFor="signup-username">Username</label>
                     <input
-                      id="username"
-                      name="username"
+                      id="signup-username"
+                      className="auth-input"
                       type="text"
                       autoComplete="username"
                       placeholder="Your gamer username"
-                      className={inputClass}
-                      value={username}
-                      onChange={(e) =>
-                        setUsername(e.target.value)
-                      }
                       minLength={3}
                       maxLength={30}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                     />
                   </div>
                 )}
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="email"
-                    className="text-sm font-medium"
-                  >
-                    Email
-                  </label>
-
+                <div>
+                  <label className="auth-label" htmlFor="auth-email">Email address</label>
                   <input
-                    id="email"
-                    name="email"
+                    id="auth-email"
+                    className="auth-input"
                     type="email"
                     autoComplete="email"
                     placeholder="you@example.com"
-                    className={inputClass}
                     value={email}
-                    onChange={(e) =>
-                      setEmail(e.target.value)
-                    }
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="password"
-                    className="text-sm font-medium"
-                  >
-                    Password
+                <div>
+                  <label className="auth-label" htmlFor="auth-password">
+                    {isSignup ? "Create password" : "Password"}
                   </label>
-
                   <div className="relative">
                     <input
-                      id="password"
-                      name="password"
-                      type={
-                        showPassword ? "text" : "password"
-                      }
-                      autoComplete={
-                        isSignup
-                          ? "new-password"
-                          : "current-password"
-                      }
-                      placeholder={
-                        isSignup
-                          ? "At least 8 characters"
-                          : "Enter your password"
-                      }
-                      className={`${inputClass} pr-20`}
-                      value={password}
-                      onChange={(e) =>
-                        setPassword(e.target.value)
-                      }
+                      id="auth-password"
+                      className="auth-input !pr-14"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete={isSignup ? "new-password" : "current-password"}
+                      placeholder={isSignup ? "At least 8 characters" : "Enter your password"}
                       minLength={isSignup ? 8 : 1}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required
                     />
-
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPassword(!showPassword)
-                      }
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#B0BEC5] hover:text-white"
-                      aria-label={
-                        showPassword
-                          ? "Hide password"
-                          : "Show password"
-                      }
+                      onClick={() => setShowPassword((value) => !value)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-[#8EA4A4] hover:text-[#F0F7F6]"
                     >
-                      {showPassword ? "Hide" : "Show"}
+                      {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                     </button>
                   </div>
                 </div>
 
                 {error && (
-                  <div
-                    role="alert"
-                    className="rounded-xl border border-[#FF1744]/30 bg-[#FF1744]/10 px-4 py-3 text-sm text-[#FF728D]"
-                  >
+                  <p role="alert" className="rounded-[4px] border border-[#FF8A79]/40 bg-[#3A1715]/40 px-4 py-3 text-sm text-[#FF9F91]">
                     {error}
-                  </div>
+                  </p>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-xl bg-[#3D5AFE] px-4 py-3.5 font-semibold text-white transition hover:bg-[#3048D9] disabled:opacity-60"
-                >
-                  {loading
-                    ? "Please wait..."
-                    : isSignup
-                      ? "Create Account"
-                      : "Sign In"}
+                <button type="submit" disabled={loading} className="auth-submit">
+                  {loading ? "Please wait..." : isSignup ? "Create my account" : "Log in to GameboxD"}
+                  {!loading && <ArrowRight className="size-5" />}
                 </button>
+                {isSignup && (
+                  <p className="text-center text-xs leading-5 text-[#8EA4A4]">
+                    Join a thoughtful, spoiler-aware gaming community.
+                  </p>
+                )}
               </form>
-
-              <p className="mt-7 text-center text-sm text-[#B0BEC5]">
-                {isSignup
-                  ? "Already have an account?"
-                  : "New to GameboxD?"}{" "}
-                <Link
-                  href={isSignup ? "/login" : "/signup"}
-                  className="font-semibold text-[#15FFB5] hover:underline"
-                >
-                  {isSignup ? "Sign in" : "Create account"}
-                </Link>
-              </p>
             </>
           )}
-        </div>
 
-        <p className="text-xs text-[#B0BEC5]">
-          © GameboxD
-        </p>
-      </section>
-
-      {/* Right: Decorative panel */}
-      <section className="relative hidden overflow-hidden border-l border-[#292D3A] bg-[#101626] lg:flex lg:flex-col lg:justify-end">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_20%,rgba(61,90,254,0.38),transparent_55%)]" />
-
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_80%,rgba(21,255,181,0.12),transparent_50%)]" />
-
-        <div className="relative z-10 p-14">
-          <div className="mb-8 flex gap-3">
-            <div className="h-48 w-32 rotate-[-7deg] rounded-xl border border-[#3D5AFE]/50 bg-gradient-to-b from-[#3D5AFE] to-[#111527]" />
-
-            <div className="h-48 w-32 translate-y-5 rounded-xl border border-[#15FFB5]/40 bg-gradient-to-b from-[#176F60] to-[#111527]" />
-
-            <div className="h-48 w-32 rotate-[7deg] rounded-xl border border-[#FF1744]/40 bg-gradient-to-b from-[#8B1C38] to-[#111527]" />
-          </div>
-
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#15FFB5]">
-            Play. Review. Connect.
-          </p>
-
-          <h2 className="max-w-lg text-4xl font-bold leading-tight">
-            Every game has a story.
-            <span className="text-[#B0BEC5]">
-              {" "}Share yours.
-            </span>
-          </h2>
-
-          <p className="mt-5 max-w-md text-[#B0BEC5]">
-            Your home for discovering games,
-            sharing opinions and connecting
-            with the gaming community.
-          </p>
+          <footer className="mt-12 flex items-center justify-between gap-3 border-t border-[#163F43]/65 pt-6 font-mono text-[10px] uppercase tracking-[0.15em] text-[#8EA4A4]">
+            <span>GameboxD / 001</span>
+            <span className="flex items-center gap-2"><LockKeyhole className="size-3" /> Private by design</span>
+          </footer>
         </div>
       </section>
     </main>
