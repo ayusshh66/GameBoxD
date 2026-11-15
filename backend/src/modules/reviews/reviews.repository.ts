@@ -179,38 +179,30 @@ export const findGameReviews = async (
   limit: number,
   offset: number
 ) => {
-  return db.query.reviews.findMany({
-    where: (reviews, { eq }) => eq(reviews.gameId, gameId),
-
-    columns: {
-      id: true,
-      content: true,
-      isEdited: true,
-      isSpoiler: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-
-    with: {
+  return db
+    .select({
+      id: reviews.id,
+      content: reviews.content,
+      isEdited: reviews.isEdited,
+      isSpoiler: reviews.isSpoiler,
+      createdAt: reviews.createdAt,
+      updatedAt: reviews.updatedAt,
       user: {
-        columns: {
-          id: true,
-          username: true,
-          displayName: true,
-          avatarUrl: true,
-        },
+        id: users.id,
+        username: users.username,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
       },
-    },
-
-    orderBy: (reviews, { desc }) => [
-      desc(reviews.createdAt),
-      desc(reviews.id),
-    ],
-
-    limit,
-    offset,
-  });
+    })
+    .from(reviews)
+    .innerJoin(users, eq(reviews.userId, users.id))
+    .where(eq(reviews.gameId, gameId))
+    .orderBy(desc(reviews.createdAt), desc(reviews.id))
+    .limit(limit)
+    .offset(offset);
 };
+
+
 
 export const editGameReview = async(
   reviewId:string,
