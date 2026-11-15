@@ -33,41 +33,41 @@ export const removeFromWishlist = async (
 };
 
 
+
 export const getUserWishlist = async (
   userId: string,
   limit: number,
   offset: number
 ) => {
-  return db.query.userWishlist.findMany({
-    columns: {
-      gameId: true,
-      createdAt: true,
-    },
+  const result = await db
+    .select({
+      gameId: userWishlist.gameId,
+      createdAt: userWishlist.createdAt,
 
-    with: {
       game: {
-        columns: {
-          id: true,
-          name: true,
-          slug: true,
-          coverUrl: true, // Added
-          averageRating: true,
-        },
+        id: games.id,
+        name: games.name,
+        slug: games.slug,
+        coverUrl: games.coverUrl,
+        averageRating: games.averageRating,
       },
-    },
-
-    where: (userWishlist, { eq }) =>
-      eq(userWishlist.userId, userId),
-
-    orderBy: (userWishlist, { desc }) => [
+    })
+    .from(userWishlist)
+    .innerJoin(
+      games,
+      eq(userWishlist.gameId, games.id)
+    )
+    .where(eq(userWishlist.userId, userId))
+    .orderBy(
       desc(userWishlist.createdAt),
-      desc(userWishlist.gameId),
-    ],
+      desc(userWishlist.gameId)
+    )
+    .limit(limit)
+    .offset(offset);
 
-    limit,
-    offset,
-  });
+  return result;
 };
+
 
 
 
@@ -102,38 +102,37 @@ export const removeFromFavorites = async (
 };
 
 
+
 export const getUserFavorites = async (
   userId: string,
   limit: number,
   offset: number
 ) => {
-  return db.query.userFavorites.findMany({
-    columns: {
-      gameId: true,
-      createdAt: true,
-    },
+  const result = await db
+    .select({
+      gameId: userFavorites.gameId,
+      createdAt: userFavorites.createdAt,
 
-    with: {
       game: {
-        columns: {
-          id: true,
-          name: true,
-          slug: true,
-          coverUrl: true,
-          averageRating: true,
-        },
+        id: games.id,
+        name: games.name,
+        slug: games.slug,
+        coverUrl: games.coverUrl,
+        averageRating: games.averageRating,
       },
-    },
-
-    where: (userFavorites, { eq }) =>
-      eq(userFavorites.userId, userId),
-
-    orderBy: (userFavorites, { desc }) => [
+    })
+    .from(userFavorites)
+    .innerJoin(
+      games,
+      eq(userFavorites.gameId, games.id)
+    )
+    .where(eq(userFavorites.userId, userId))
+    .orderBy(
       desc(userFavorites.createdAt),
-      desc(userFavorites.gameId),
-    ],
+      desc(userFavorites.gameId)
+    )
+    .limit(limit)
+    .offset(offset);
 
-    limit,
-    offset,
-  });
+  return result;
 };
