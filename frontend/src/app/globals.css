@@ -3,7 +3,7 @@
 :root {
   color-scheme: dark;
 
-  /* GameboxD – Obsidian Flare, adapted to the Stitch auth reference */
+  /* GameboxD – Obsidian Flare: original auth theme */
   --background: #011717;
   --background-deep: #001111;
   --surface: #071f1f;
@@ -43,36 +43,7 @@ button:not(:disabled) { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 ::selection { background: rgba(252, 82, 30, 0.35); color: #fff; }
 
-/* Shared auth controls */
-.auth-label {
-  display: block;
-  margin-bottom: 9px;
-  color: var(--muted);
-  font-family: var(--font-grotesk), sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-.auth-input {
-  display: block;
-  width: 100%;
-  height: 56px;
-  border: 1px solid var(--outline);
-  border-radius: 4px;
-  background: #051d1c;
-  color: var(--foreground);
-  padding: 0 18px;
-  font-size: 15px;
-  transition: border-color 160ms, box-shadow 160ms;
-}
-.auth-input::placeholder { color: var(--muted-low); }
-.auth-input:focus-visible {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(252, 82, 30, 0.18);
-}
-.auth-input[aria-invalid="true"] { border-color: var(--error); }
+/* Existing submit button – unchanged */
 .auth-submit {
   display: inline-flex;
   align-items: center;
@@ -96,3 +67,71 @@ button:disabled { cursor: not-allowed; }
 .auth-submit:active:not(:disabled) { transform: translateY(1px); }
 .auth-submit:disabled { opacity: 0.65; }
 :focus-visible { outline-offset: 3px; }
+
+/* Original boxed auth input + 21st.dev letter-by-letter label animation.
+   Uses the class names in your existing ui/animated-input.tsx. */
+.gameboxd-animated-input {
+  position: relative;
+  width: 100%;
+  height: 86px; /* 30px reserved above the original 56px input */
+}
+
+.gameboxd-animated-control {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 56px;
+  border: 1px solid var(--outline);
+  border-radius: 4px;
+  background: #051d1c;
+  color: var(--foreground);
+  padding: 0 18px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 160ms, box-shadow 160ms;
+}
+.gameboxd-animated-control.has-trailing { padding-right: 56px; }
+.gameboxd-animated-control::placeholder { color: transparent; }
+.gameboxd-animated-control:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(252, 82, 30, 0.18);
+}
+.gameboxd-animated-control[aria-invalid="true"] { border-color: var(--error); }
+
+.gameboxd-animated-label {
+  position: absolute;
+  z-index: 2;
+  top: 58px;
+  left: 18px;
+  transform: translateY(-50%);
+  color: var(--foreground);
+  font-family: var(--font-grotesk), sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: transform 180ms ease;
+}
+/* The letter animation still uses the component's original stagger + spring.
+   Move its anchor a little so raised letters clear the box's top border. */
+.gameboxd-animated-input:focus-within .gameboxd-animated-label,
+.gameboxd-animated-input:has(.gameboxd-animated-control:not(:placeholder-shown)) .gameboxd-animated-label {
+  transform: translateY(calc(-50% - 12px));
+}
+
+.gameboxd-animated-trailing {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 56px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-submit,
+  .gameboxd-animated-control,
+  .gameboxd-animated-label { transition-duration: 0.01ms; }
+}
