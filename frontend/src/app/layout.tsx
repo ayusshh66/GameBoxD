@@ -1,21 +1,32 @@
-
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
+const grotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-grotesk",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "GameboxD",
-  description:
-    "Discover, rate, review and share your favorite games.",
+  title: { default: "GameboxD", template: "%s | GameboxD" },
+  description: "Track what you play. Remember how it felt.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${jakarta.variable} ${grotesk.variable} antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }
