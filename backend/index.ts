@@ -32,13 +32,11 @@ app.get("/", async(req: Request, res: Response) => {
 app.use("/api/auth", authRouter)
 app.use("/api/games", catalogRoutes);
 app.use("/api/games", gameRouter);
-app.use("/api/games",gameRouter)
 app.use("/api/genres",genreRouter)
 app.use("/api/tags",tagsRouter)
 app.use("/api/platforms",platformRouter)
 app.use("/api", reviewsRoutes);
 app.use("/api", libraryRoutes);
-app.use("/api/users", usersRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/users", followsRoutes);
 app.use("/api/feed", feedRoutes);
