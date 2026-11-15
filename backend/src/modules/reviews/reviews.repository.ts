@@ -3,7 +3,11 @@ import { reviews, userGameRatings } from "../../db/schema/reviews";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { db, users } from "../../db/index";
 
-export const refreshRatingStats = async (tx: any, gameId: string) => {
+
+export const refreshRatingStats = async (
+  tx: any,
+  gameId: string
+) => {
   const [stats] = await tx
     .select({
       average: sql<string | null>`
@@ -18,7 +22,7 @@ export const refreshRatingStats = async (tx: any, gameId: string) => {
     .update(games)
     .set({
       averageRating: stats.average,
-      ratingCount: stats.count,
+      ratingsCount: stats.count,
     })
     .where(eq(games.id, gameId));
 };
@@ -177,6 +181,7 @@ export const insertGameReview = async (
 };
 
 
+
 export const findGameReviews = async (
   gameId: string,
   limit: number,
@@ -190,6 +195,7 @@ export const findGameReviews = async (
       isSpoiler: reviews.isSpoiler,
       createdAt: reviews.createdAt,
       updatedAt: reviews.updatedAt,
+
       user: {
         id: users.id,
         username: users.username,
@@ -198,12 +204,19 @@ export const findGameReviews = async (
       },
     })
     .from(reviews)
-    .innerJoin(users, eq(reviews.userId, users.id))
+    .innerJoin(
+      users,
+      eq(reviews.userId, users.id)
+    )
     .where(eq(reviews.gameId, gameId))
-    .orderBy(desc(reviews.createdAt), desc(reviews.id))
+    .orderBy(
+      desc(reviews.createdAt),
+      desc(reviews.id)
+    )
     .limit(limit)
     .offset(offset);
 };
+
 
 
 
