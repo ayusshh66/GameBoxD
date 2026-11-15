@@ -11,10 +11,10 @@ type ApiOptions = {
 };
 
 export async function apiRequest<T>(
-  path: string,
+  endpoint: string,
   options: ApiOptions = {}
 ): Promise<ApiResponse<T>> {
-  const response = await fetch(path, {
+  const response = await fetch(endpoint, {
     method: options.method ?? "GET",
 
     headers:
@@ -27,21 +27,20 @@ export async function apiRequest<T>(
         ? JSON.stringify(options.body)
         : undefined,
 
-    // Send browser cookies with requests.
+    // Browser sends the HTTP-only JWT cookie
     credentials: "include",
 
     cache: "no-store",
   });
 
-  const result: ApiResponse<T> | null =
-    await response.json().catch(() => null);
+  const result = await response.json().catch(() => null);
 
   if (!response.ok || !result?.success) {
     throw new Error(
       result?.message ??
-        `Request failed with status ${response.status}`
+      `Request failed: ${response.status}`
     );
   }
 
-  return result;
+  return result as ApiResponse<T>;
 }
