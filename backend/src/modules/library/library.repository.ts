@@ -32,6 +32,7 @@ export const removeFromWishlist = async (
   return deleted ?? null;
 };
 
+
 export const getUserWishlist = async (
   userId: string,
   limit: number,
@@ -49,6 +50,7 @@ export const getUserWishlist = async (
           id: true,
           name: true,
           slug: true,
+          coverUrl: true, // Added
           averageRating: true,
         },
       },
@@ -66,6 +68,7 @@ export const getUserWishlist = async (
     offset,
   });
 };
+
 
 
 export const addToFavorites = async (
