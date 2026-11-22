@@ -10,7 +10,7 @@ export default async function ShelfPage({ params, searchParams }: {
   const raw = (await searchParams).page ?? "1";
   const page = /^\d+$/.test(raw) ? Math.max(1, Math.min(100, Number(raw))) : 1;
   let result: GameShelf | null = null;
-  try { result = await homeApi<GameShelf>(`/api/games/home/shelves/${encodeURIComponent(key)}?page=${page}&limit=18`); }
+  try { result = await homeApi<GameShelf>(`/api/discovery/home/shelves/${encodeURIComponent(key)}?page=${page}&limit=18`); }
   catch { /* Show an honest empty/error state, not fake posters. */ }
   return <div className="gbh-root"><div className="gbh-main">
     <div className="gbh-collection-heading"><Link href="/home" style={{color:"#fc521e"}}>← Back to Home</Link><h1>{result?.title ?? "Unable to load collection"}</h1><p>{result?.subtitle ?? "Please check your backend or try again."}</p></div>
