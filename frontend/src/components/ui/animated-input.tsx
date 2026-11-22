@@ -16,7 +16,7 @@ const containerVariants = {
 };
 
 const letterVariants = {
-  initial: { y: 0, color: "inherit" },
+  initial: { y: 0, color: "#F0F7F6"},
   animate: {
     y: "-120%",
     color: "var(--muted)",

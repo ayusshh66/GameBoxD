@@ -44,8 +44,7 @@ app.use("/api/users", followsRoutes);
 app.use("/api/feed", feedRoutes);
 app.use("/api/reviews", reviewLikesRoutes);
 // Specific discovery routes FIRST
-app.use("/api/games", homeDiscoveryRoutes);
-
+app.use("/api/discovery", homeDiscoveryRoutes);
 // General games routes SECOND
 app.use("/api/games", gameRouter);
 

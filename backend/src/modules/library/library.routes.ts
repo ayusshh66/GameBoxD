@@ -13,38 +13,41 @@ import {
 
 const router = Router();
 
-// All library routes require authentication
-router.use(authenticate);
-
 // Wishlist
 router.post(
   "/games/:gameId/wishlist",
+  authenticate,
   addWishlistController
 );
 
 router.delete(
   "/games/:gameId/wishlist",
+  authenticate,
   deleteWishlistController
 );
 
 router.get(
   "/users/me/wishlist",
+  authenticate,
   getWishlistController
 );
 
 // Favorites
 router.post(
   "/games/:gameId/favorite",
+  authenticate,
   addFavoriteController
 );
 
 router.delete(
   "/games/:gameId/favorite",
+  authenticate,
   deleteFavoriteController
 );
 
 router.get(
   "/users/me/favorites",
+  authenticate,
   getFavoritesController
 );
 

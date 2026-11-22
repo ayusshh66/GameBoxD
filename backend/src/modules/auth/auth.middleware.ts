@@ -18,12 +18,12 @@ export const authenticate = async(req:AuthRequest, res:Response, next : NextFunc
 
         const token = req.cookies.token;
 
-        if(!token){
-            return res.status(400).json({
-                success : false,
-                message : "Authentication Required",
-            })
-        }
+        if (!token) {
+  return res.status(401).json({
+    success: false,
+    message: "Authentication required", 
+  });
+}
 
         const decoded = jwt.verify(token, JWT_SECRET) as {userId : string};
 
