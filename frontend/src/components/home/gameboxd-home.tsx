@@ -2,173 +2,176 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
-  ArrowRight, ChevronLeft, ChevronRight, CircleUserRound,
-  Gamepad2, Menu, Pause, Play, Search, Volume2, VolumeX, X,
+  ArrowRight, BookmarkPlus, ChevronLeft, ChevronRight, Gamepad2,
+  Heart, Pause, Play, Star, Volume2, VolumeX,
 } from "lucide-react";
 import type { GameboxdHomePayload, GameShelf, HomeGame } from "@/lib/home-data";
-import { apiRequest } from "@/lib/api";
 import "./gameboxd-home.css";
 
-const LINKS = [
-  { label: "Home", href: "/home" },
-  { label: "Games", href: "/games" },
-  { label: "Mobile", href: "/mobile" },
-  { label: "Following", href: "/following" },
-  { label: "Wishlist", href: "/wishlist" },
-  { label: "Community", href: "/community" },
-];
+type Mode = "all" | "mobile";
+type RailStyle = "poster" | "landscape" | "recent" | "compact";
 
-function TopNav() {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<{ username: string } | null>(null);
-  useEffect(() => {
-    let mounted = true;
-    apiRequest<{ username: string }>("/api/auth/me")
-      .then((res) => { if (mounted) setUser(res.data); })
-      .catch(() => { if (mounted) setUser(null); });
-    return () => { mounted = false; };
-  }, []);
-  return (
-    <header className="gbh-header">
-      <Link href="/home" className="gbh-brand" aria-label="GameboxD home">
-        <Gamepad2 size={25} strokeWidth={2.5} /> GAMEBOX<span>D</span>
-      </Link>
-      <nav className={`gbh-pill-nav ${open ? "gbh-pill-open" : ""}`} aria-label="Main navigation">
-        {LINKS.map((link) => (
-          <Link key={link.label} href={link.href}
-            aria-current={(pathname === link.href || (link.href === "/home" && pathname === "/discover")) ? "page" : undefined}
-            onClick={() => setOpen(false)}
-            className={(pathname === link.href || (link.href === "/home" && pathname === "/discover")) ? "gbh-nav-active" : ""}>
-            {link.label}
-          </Link>
-        ))}
-        <Link href="/games" className="gbh-search-icon" title="Search games" aria-label="Search games"><Search size={18} /></Link>
-      </nav>
-      <div className="gbh-right">
-        <Link className="gbh-user" href={user ? `/users/${encodeURIComponent(user.username)}` : "/login"} aria-label={user ? `${user.username}'s profile` : "Log in"}>
-          <CircleUserRound size={27} />
-        </Link>
-        <button className="gbh-menu-button" type="button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((x) => !x)}>
-          {open ? <X size={23} /> : <Menu size={23} />}
-        </button>
-      </div>
-    </header>
+const genresOrder = ["recent", "community", "indie", "horror", "action", "open-world", "rpg", "zombies", "racing", "multiplayer", "mobile"];
+const headingOverrides: Record<string, { title: string; eyebrow?: string }> = {
+  recent: { title: "Recently Released", eyebrow: "Fresh worlds to explore" },
+  community: { title: "Everyone's Talking About These", eyebrow: "Most reviewed by GameboxD players" },
+  indie: { title: "Indie Gems", eyebrow: "Unforgettable independent adventures" },
+  horror: { title: "Horror Nights", eyebrow: "Survive the unexpected" },
+  action: { title: "Action & Adventure", eyebrow: "High-intensity journeys" },
+  "open-world": { title: "Open-World Adventures", eyebrow: "Go anywhere, discover everything" },
+  rpg: { title: "Deep RPG Worlds", eyebrow: "Build your own story" },
+  zombies: { title: "Zombie Survival", eyebrow: "Make every moment count" },
+  racing: { title: "Racing Games", eyebrow: "Push the limits" },
+  multiplayer: { title: "Multiplayer With Friends", eyebrow: "Better together" },
+  mobile: { title: "Mobile & Handheld Hits", eyebrow: "Play wherever you go" },
+};
+
+function GameArtwork({ game, landscape = false, eager = false }: { game: HomeGame; landscape?: boolean; eager?: boolean }) {
+  const src = landscape ? game.backgroundUrl ?? game.imageUrl : game.imageUrl ?? game.backgroundUrl;
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]);
+  return src && !failed ? (
+    // Remote RAWG images are URL data. Avoid requiring new next.config image domains.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={game.name} loading={eager ? "eager" : "lazy"} className="gbs-artwork" onError={() => setFailed(true)} />
+  ) : (
+    <div className="gbs-artwork gbs-artwork-empty"><Gamepad2 size={32}/><span>{game.name}</span></div>
   );
 }
 
-function MediaImage({ game, mode = "poster" }: { game: HomeGame; mode?: "poster" | "landscape" }) {
-  const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [game.imageUrl, game.backgroundUrl]);
-  const src = mode === "landscape" ? game.backgroundUrl ?? game.imageUrl : game.imageUrl;
-  return src && !failed ? (
-    // RAWG URLs are external image locations; using img avoids adding a provider config.
-    // eslint-disable-next-line @next/next/no-img-element
-    <img className="gbh-cover" alt={game.name} loading="lazy" src={src} onError={() => setFailed(true)} />
-  ) : <div className="gbh-cover gbh-cover-empty"><Gamepad2 size={36}/><span>{game.name}</span></div>;
+function RatingTag({ game }: { game: HomeGame }) {
+  return game.rating !== null && Number.isFinite(game.rating) ? (
+    <span className="gbs-rating"><Star size={12} fill="currentColor"/>{game.rating.toFixed(1)} <small>{game.source === "rawg" ? "RAWG" : "GameboxD"}</small></span>
+  ) : null;
 }
 
-function FeaturedHero({ game, videoUrl }: { game: HomeGame; videoUrl: string | null }) {
+function CinematicHero({ game, videoUrl }: { game: HomeGame; videoUrl: string | null }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(true);
   useEffect(() => {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      videoRef.current?.pause();
+    if (videoRef.current && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      videoRef.current.pause();
       setPaused(true);
     }
   }, []);
-  function togglePause() {
+  const togglePlayback = () => {
     const el = videoRef.current;
     if (!el) return;
-    if (el.paused) { void el.play().then(() => setPaused(false)).catch(() => setPaused(true)); }
+    if (el.paused) void el.play().then(() => setPaused(false)).catch(() => setPaused(true));
     else { el.pause(); setPaused(true); }
-  }
+  };
   return (
-    <section className="gbh-feature" aria-label="Featured game">
-      {game.backgroundUrl && <div className="gbh-feature-image" style={{ backgroundImage: `url("${game.backgroundUrl}")` }} />}
-      {videoUrl && <video ref={videoRef} className="gbh-feature-video" poster={game.backgroundUrl ?? undefined}
-        autoPlay muted={muted} loop playsInline preload="none" src={videoUrl} />}
-      <div className="gbh-feature-shade" />
-      {videoUrl && <div className="gbh-media-controls">
-        <button onClick={togglePause} type="button" aria-label={paused ? "Play video" : "Pause video"}>{paused ? <Play size={18}/> : <Pause size={18}/>}</button>
-        <button onClick={() => setMuted((m) => !m)} type="button" aria-label={muted ? "Unmute video" : "Mute video"}>{muted ? <VolumeX size={18}/> : <Volume2 size={18}/>}</button>
-      </div>}
-      <div className="gbh-feature-caption">
-        <span className="gbh-kicker">FEATURED GAME</span>
-        <h1>{game.name}</h1>
-        <p className="gbh-feature-meta">{[game.genre, game.released?.slice(0,4)].filter(Boolean).join("  ·  ")}</p>
-        <div className="gbh-hero-actions">
-          <Link href={game.href} className="gbh-primary-action"><Play size={17} fill="currentColor" /> View Game</Link>
-          <Link href="/games" className="gbh-secondary-action">Explore Games <ArrowRight size={17} /></Link>
+    <section className="gbs-hero" aria-labelledby="gbs-featured-title">
+      <div className="gbs-hero-image" style={{ backgroundImage: game.backgroundUrl ? `url("${game.backgroundUrl}")` : undefined }} />
+      {videoUrl ? (
+        <video ref={videoRef} className="gbs-hero-video" src={videoUrl} poster={game.backgroundUrl ?? undefined} autoPlay muted={muted} loop playsInline preload="none" />
+      ) : null}
+      <div className="gbs-hero-overlay" />
+      <div className="gbs-hero-badge"><span className="gbs-live-dot"/> Featured Game</div>
+      {videoUrl && (
+        <div className="gbs-hero-media-controls">
+          <button type="button" onClick={togglePlayback} aria-label={paused ? "Play trailer" : "Pause trailer"}>{paused ? <Play size={17}/> : <Pause size={17}/>}</button>
+          <button type="button" onClick={() => setMuted(x => !x)} aria-label={muted ? "Unmute trailer" : "Mute trailer"}>{muted ? <VolumeX size={17}/> : <Volume2 size={17}/>}</button>
+        </div>
+      )}
+      <div className="gbs-hero-copy">
+        <div className="gbs-hero-kicker"><span>SPOTLIGHT</span> {game.genre && <span>{game.genre}</span>} {game.released && <span>{game.released.slice(0,4)}</span>}</div>
+        <h1 id="gbs-featured-title">{game.name}</h1>
+        <div className="gbs-hero-rating"><RatingTag game={game}/></div>
+        <p>Explore the story, community reviews, ratings and screenshots on GameboxD.</p>
+        <div className="gbs-hero-actions">
+          <Link href={game.href} className="gbs-cta"><Gamepad2 size={17}/> Game Details <ArrowRight size={17}/></Link>
+          <Link href="/games" className="gbs-cta-secondary">Explore games</Link>
         </div>
       </div>
-      <div className="gbh-feature-tag">{game.rating !== null ? `★ ${game.rating.toFixed(1)} RAWG` : "Explore on GameboxD"}</div>
     </section>
   );
 }
 
-function ShelfRow({ shelf, isTop = false, landscape = false }: { shelf: GameShelf; isTop?: boolean; landscape?: boolean }) {
+function RankedTen({ games }: { games: HomeGame[] }) {
   const scroller = useRef<HTMLDivElement>(null);
-  const scroll = (direction: number) => scroller.current?.scrollBy({ left: scroller.current.clientWidth * .74 * direction, behavior: "smooth" });
-  if (!shelf.games.length) return null;
+  if (!games.length) return null;
+  const shift = (direction: number) => scroller.current?.scrollBy({ left: direction * Math.max(300, scroller.current.clientWidth * 0.8), behavior: "smooth" });
   return (
-    <section className={`gbh-shelf ${isTop ? "gbh-ranked-shelf" : ""}`} aria-label={shelf.title}>
-      <div className="gbh-shelf-heading">
-        <div><h2>{shelf.title}</h2>{shelf.subtitle && <p>{shelf.subtitle}</p>}</div>
-        {!isTop && shelf.key !== "community" && <Link href={`/home/shelves/${encodeURIComponent(shelf.key)}`} className="gbh-see-all">View all <ArrowRight size={15}/></Link>}
+    <section className="gbs-section gbs-top-ten" aria-label="Top 10 games">
+      <div className="gbs-section-heading">
+        <div><div className="gbs-heading-line"><span className="gbs-heading-dot"/><h2>Top 10 Most Added Games</h2></div><p>Most added games on RAWG, not live GameboxD plays</p></div>
+        <div className="gbs-heading-actions"><button onClick={() => shift(-1)} aria-label="Scroll Top 10 left"><ChevronLeft size={18}/></button><button onClick={() => shift(1)} aria-label="Scroll Top 10 right"><ChevronRight size={18}/></button></div>
       </div>
-      <div className="gbh-slider-layout">
-        <div className="gbh-scroll" ref={scroller} tabIndex={0} aria-label={`${shelf.title} games; scroll horizontally`}>
-          {shelf.games.map((game, i) => (
-            <Link key={`${shelf.key}:${game.id}`} href={game.href}
-              className={isTop ? "gbh-rank-item" : `gbh-game-item ${landscape ? "gbh-item-wide" : ""}`}
-              title={game.name}>
-              {isTop && <span className="gbh-rank-number" aria-hidden="true">{i + 1}</span>}
-              <div className="gbh-image-shell"><MediaImage game={game} mode={landscape ? "landscape" : "poster"} />
-                <div className="gbh-card-hover"><span>View Game <ArrowRight size={14}/></span></div>
-              </div>
-              <div className="gbh-poster-caption"><span>{game.name}</span>{game.rating !== null && <small>★ {game.rating.toFixed(1)} <span>{game.source === "rawg" ? "RAWG" : "GameboxD"}</span></small>}</div>
-            </Link>
-          ))}
-        </div>
-        <div className="gbh-slide-buttons">
-          <button type="button" aria-label={`Scroll ${shelf.title} left`} onClick={() => scroll(-1)}><ChevronLeft size={22}/></button>
-          <button type="button" aria-label={`Scroll ${shelf.title} right`} onClick={() => scroll(1)}><ChevronRight size={22}/></button>
-        </div>
+      <div className="gbs-rank-track" ref={scroller} tabIndex={0} aria-label="Scroll Top 10 games horizontally">
+        {games.slice(0,10).map((game, i) => (
+          <Link href={game.href} className="gbs-rank-card" key={`rank-${game.id}`} title={game.name}>
+            <span className="gbs-rank-number" aria-hidden="true">{i+1}</span>
+            <div className="gbs-rank-cover"><GameArtwork game={game}/><div className="gbs-poster-hover">View Game <ArrowRight size={15}/></div></div>
+            <div className="gbs-card-meta"><span className="gbs-card-name">{game.name}</span><RatingTag game={game}/></div>
+          </Link>
+        ))}
       </div>
     </section>
   );
 }
 
-function CommunityBanner() {
-  return <section className="gbh-community-banner">
-    <div><span className="gbh-kicker">GAMEBOXD COMMUNITY</span><h2>Games are better together.</h2><p>Review what you play, follow other gamers, and see what they recommend.</p></div>
-    <Link href="/following">Open Following Feed <ArrowRight size={17}/></Link>
+function Shelf({ shelf, style = "poster" }: { shelf: GameShelf; style?: RailStyle }) {
+  const scroller = useRef<HTMLDivElement>(null);
+  const config = headingOverrides[shelf.key];
+  if (shelf.games.length === 0) return null;
+  const shift = (direction: number) => scroller.current?.scrollBy({ left: direction * Math.max(300, scroller.current.clientWidth * 0.78), behavior: "smooth" });
+  return (
+    <section className={`gbs-section gbs-shelf-section gbs-style-${style}`} aria-labelledby={`shelf-${shelf.key}`}>
+      <div className="gbs-section-heading">
+        <div><div className="gbs-heading-line"><span className="gbs-heading-dot"/><h2 id={`shelf-${shelf.key}`}>{config?.title ?? shelf.title}</h2></div>{(config?.eyebrow ?? shelf.subtitle) && <p>{config?.eyebrow ?? shelf.subtitle}</p>}</div>
+        <div className="gbs-heading-actions">
+          {shelf.key === "community" ? <Link href="/following" className="gbs-view-all">Following Feed <ArrowRight size={13}/></Link> : <Link href={`/home/shelves/${encodeURIComponent(shelf.key)}`} className="gbs-view-all">See all <ArrowRight size={13}/></Link>}
+          <button onClick={() => shift(-1)} aria-label={`Scroll ${shelf.title} left`}><ChevronLeft size={18}/></button>
+          <button onClick={() => shift(1)} aria-label={`Scroll ${shelf.title} right`}><ChevronRight size={18}/></button>
+        </div>
+      </div>
+      <div className="gbs-card-track" ref={scroller} tabIndex={0} aria-label={`${shelf.title} games, horizontally scrollable`}>
+        {shelf.games.map((game) => (
+          <Link href={game.href} key={`${shelf.key}-${game.id}`} className="gbs-game-card" title={game.name}>
+            <div className="gbs-game-cover">
+              <GameArtwork game={game} landscape={style === "landscape" || style === "recent"}/>
+              {style === "recent" && <span className="gbs-new-chip">NEW</span>}
+              <div className="gbs-poster-hover">View Game <ArrowRight size={15}/></div>
+            </div>
+            <div className="gbs-card-meta"><span className="gbs-card-name">{game.name}</span><RatingTag game={game}/></div>
+            {style === "landscape" ? <p className="gbs-card-genre">{game.genre ?? "Discover this game"}</p> : null}
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CtaBanner() {
+  return <section className="gbs-banner">
+    <div className="gbs-banner-icon"><Gamepad2 size={25}/></div>
+    <h2>Track, rate and discover your next obsession.</h2>
+    <p>Build your wishlist, share thoughtful reviews, and find games worth exploring.</p>
+    <div><Link href="/games" className="gbs-cta">Explore games <ArrowRight size={17}/></Link><Link href="/wishlist" className="gbs-cta-secondary"><BookmarkPlus size={16}/> Wishlist</Link></div>
+    <Heart className="gbs-banner-ghost" aria-hidden="true" size={112}/>
   </section>;
 }
 
-export default function GameboxdHome({ data, error, mode = "all" }: {
-  data: GameboxdHomePayload | null;
-  error: string | null;
-  mode?: "all" | "mobile";
-}) {
-  const top = data ? { key: "top", title: "Top 10 • Most Added on RAWG", subtitle: "Popularity based on RAWG additions, not GameboxD daily plays", games: data.topTen, page: 1, hasMore: true } satisfies GameShelf : null;
-  const filtered = mode === "mobile" ? (data?.shelves.filter((s) => s.key === "mobile") ?? []) : (data?.shelves ?? []);
+export default function GameboxdHome({ data, error, mode = "all" }: { data: GameboxdHomePayload | null; error: string | null; mode?: Mode }) {
+  const shelves = (data?.shelves ?? []).slice().sort((a,b) => genresOrder.indexOf(a.key) - genresOrder.indexOf(b.key));
+  const filtered = mode === "mobile" ? shelves.filter(s => s.key === "mobile") : shelves;
   const hero = mode === "mobile" ? filtered[0]?.games[0] ?? null : data?.hero ?? null;
-  return <div className="gbh-root">
-    <TopNav />
-    <main className="gbh-main">
-      {mode === "mobile" && <div className="gbh-mobile-heading"><span className="gbh-kicker">BROWSE BY PLATFORM</span><h1>Mobile Games</h1></div>}
-      {error && <div className="gbh-error" role="alert">{error}</div>}
-      {hero && <FeaturedHero game={hero} videoUrl={mode === "all" ? data?.heroVideoUrl ?? null : null} />}
-      {mode === "all" && top && <ShelfRow shelf={top} isTop />}
-      {filtered.map((s, i) => <ShelfRow key={s.key} shelf={s} landscape={mode === "all" && (s.key === "community" || i === 3)} />)}
-      {mode === "all" && <CommunityBanner />}
-      {data?.unavailableSections?.length ? <p className="gbh-error-footnote">Some shelves couldn't load. RAWG may be unavailable or rate-limited. Refresh after checking the backend.</p> : null}
-    </main>
-    <footer className="gbh-footer"><span>GAMEBOXD · Track what you play. Remember how it felt.</span><a href="https://rawg.io/" target="_blank" rel="noopener noreferrer">Game metadata and images by RAWG</a></footer>
-  </div>;
+  return (
+    <div className="gbs-home">
+      <main className="gbs-home-main">
+        {mode === "mobile" && <div className="gbs-page-title"><span>Browse by platform</span><h1>Mobile games</h1></div>}
+        {error && <div className="gbs-load-error" role="alert">{error} Check the response from <code>/api/discovery/home</code>.</div>}
+        {hero && <CinematicHero game={hero} videoUrl={mode === "all" ? data?.heroVideoUrl ?? null : null}/>}
+        {mode === "all" && data?.topTen?.length ? <RankedTen games={data.topTen}/> : null}
+        {filtered.map(s => <Shelf key={s.key} shelf={s} style={s.key === "recent" ? "recent" : s.key === "community" || s.key === "action" || s.key === "open-world" ? "landscape" : s.key === "mobile" ? "compact" : "poster"}/>)}
+        {!error && !hero && filtered.length === 0 && <div className="gbs-no-games">No games are available to display yet. Try again when the catalogue API responds.</div>}
+        {mode === "all" && <CtaBanner/>}
+        {data?.unavailableSections?.length ? <p className="gbs-partial-warning">Some shelves could not load ({data.unavailableSections.join(", ")}). Other sections are still available.</p> : null}
+      </main>
+      <footer className="gbs-footer"><span>GAMEBOXD · Track what you play. Remember how it felt.</span><a href="https://rawg.io" target="_blank" rel="noreferrer">Game metadata and images by RAWG</a></footer>
+    </div>
+  );
 }
