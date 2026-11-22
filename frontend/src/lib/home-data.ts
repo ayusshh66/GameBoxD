@@ -35,15 +35,16 @@ export async function homeApi<T>(path: string): Promise<T> {
   // Only call this in Next.js Server Components. RAWG_API_KEY never reaches the browser.
   const backend = (process.env.BACKEND_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
   const response = await fetch(`${backend}${path}`, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Backend request failed (${response.status})`);
-  const body = (await response.json()) as ApiEnvelope<T>;
-  if (!body.success) throw new Error(body.message ?? "Backend returned an error");
+  const body = (await response.json().catch(() => null)) as ApiEnvelope<T> | null;
+  if (!response.ok || !body?.success) {
+    throw new Error(`Home API ${response.status}: ${body?.message ?? "Request failed"}`);
+  }
   return body.data;
 }
 
 export async function loadHome(): Promise<{ data: GameboxdHomePayload | null; error: string | null }> {
   try {
-    return { data: await homeApi<GameboxdHomePayload>("/api/games/home"), error: null };
+    return { data: await homeApi<GameboxdHomePayload>("/api/discovery/home"), error: null };
   } catch (error) {
     console.error("GameboxD homepage API failed:", error);
     return { data: null, error: "Unable to load games. Check Express, Redis, and RAWG_API_KEY." };
