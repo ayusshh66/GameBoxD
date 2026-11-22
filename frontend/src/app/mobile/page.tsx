@@ -1,6 +1,3 @@
-
-
-
 import GameboxdHome from "@/components/home/gameboxd-home";
 import { loadHome } from "@/lib/home-data";
 
