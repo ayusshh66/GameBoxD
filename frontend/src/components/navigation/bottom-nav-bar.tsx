@@ -56,7 +56,7 @@ export function BottomNavBar() {
   if (AUTH_PAGES.some((p) => pathname === p || pathname.startsWith(p + "/"))) return null;
 
   return (
-    <div className="gbd-bottom-nav-position">
+    <div className="gbd-top-nav-position">
       <motion.nav
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}

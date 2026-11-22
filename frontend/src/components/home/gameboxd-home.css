@@ -18,3 +18,18 @@
 @media(prefers-reduced-motion:reduce){.gbs-home *, .gbs-home *::before,.gbs-home *::after{scroll-behavior:auto!important;transition-duration:0s!important;animation-duration:0s!important}}
 /* View-all collection route, retained from the existing GameboxD project. */
 .gbh-root{min-height:100vh;background:#011717;color:#cee7e7;font-family:var(--font-jakarta),sans-serif}.gbh-root a{color:inherit;text-decoration:none}.gbh-main{max-width:1600px;margin:0 auto;padding:100px clamp(16px,3vw,52px) 115px}.gbh-collection-heading{padding:10px 0 28px}.gbh-collection-heading h1{font-size:clamp(28px,4vw,45px);font-family:var(--font-grotesk),sans-serif;margin:15px 0 8px}.gbh-collection-heading p{color:#91aba8}.gbh-collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:18px}.gbh-game-item{min-width:0}.gbh-image-shell{position:relative;aspect-ratio:3/4;overflow:hidden;border-radius:6px;background:#153231}.gbh-cover{display:block;width:100%;height:100%;object-fit:cover}.gbh-cover-empty{display:grid;place-items:center;color:#a8bfbb}.gbh-poster-caption{margin:9px 0;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gbh-pagination{display:flex;gap:13px;justify-content:center;margin:35px 0}.gbh-pagination a{padding:10px 15px;border-radius:6px;background:#153231}.gbh-footer{padding:25px 5% 105px;color:#9fbcba;border-top:1px solid #20403d}
+
+/* V2: theme the homepage from the featured game's artwork, not a fixed color. */
+.gbs-home{position:relative;isolation:isolate;background:linear-gradient(160deg,#101717,#091112 60%,#0a1112)}
+.gbs-ambient-backdrop{position:fixed;inset:-90px;z-index:-1;pointer-events:none;background-position:center 30%;background-size:cover;background-repeat:no-repeat;filter:blur(85px) saturate(1.25);opacity:.33;transform:scale(1.06)}
+.gbs-home::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(5,8,10,.25),rgba(5,8,10,.72) 45%,rgba(5,9,12,.90))}
+.gbs-home-main{padding-top:19px}
+.gbs-footer{padding-bottom:28px}
+@media(max-width:840px){.gbs-home-main{padding-top:15px;padding-bottom:45px}}
+@media(prefers-reduced-motion:reduce){.gbs-ambient-backdrop{filter:blur(70px)}}
+
+/* V3: don't paint over the full-screen, game-colored body backdrop. */
+.gbs-home { background: transparent !important; }
+.gbs-home::after, .gbs-ambient-backdrop { display: none !important; }
+.gbs-home-main, .gbs-footer { position: relative; z-index: 1; }
+/* Keep the featured image crisp; only the ambient backdrop is blurred. */

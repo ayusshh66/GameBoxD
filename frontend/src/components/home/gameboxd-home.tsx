@@ -159,8 +159,30 @@ export default function GameboxdHome({ data, error, mode = "all" }: { data: Game
   const shelves = (data?.shelves ?? []).slice().sort((a,b) => genresOrder.indexOf(a.key) - genresOrder.indexOf(b.key));
   const filtered = mode === "mobile" ? shelves.filter(s => s.key === "mobile") : shelves;
   const hero = mode === "mobile" ? filtered[0]?.games[0] ?? null : data?.hero ?? null;
+  const featuredArt = hero?.backgroundUrl ?? hero?.imageUrl ?? null;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (featuredArt) {
+      // Drive the *entire page*, including the transparent navbar, from this game.
+      root.style.setProperty("--gbd-featured-artwork", `url(${JSON.stringify(featuredArt)})`);
+    } else {
+      root.style.removeProperty("--gbd-featured-artwork");
+    }
+    return () => {
+      root.style.removeProperty("--gbd-featured-artwork");
+    };
+  }, [featuredArt]);
+
   return (
     <div className="gbs-home">
+      {hero && (hero.backgroundUrl || hero.imageUrl) && (
+        <div
+          className="gbs-ambient-backdrop"
+          aria-hidden="true"
+          style={{ backgroundImage: `url(${JSON.stringify(hero.backgroundUrl ?? hero.imageUrl)})` }}
+        />
+      )}
       <main className="gbs-home-main">
         {mode === "mobile" && <div className="gbs-page-title"><span>Browse by platform</span><h1>Mobile games</h1></div>}
         {error && <div className="gbs-load-error" role="alert">{error} Check the response from <code>/api/discovery/home</code>.</div>}

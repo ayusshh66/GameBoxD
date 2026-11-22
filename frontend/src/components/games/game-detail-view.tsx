@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, Bookmark, Check, ChevronDown, ChevronLeft, ChevronRight,
+  ArrowLeft, Bookmark, Check, ChevronLeft, ChevronRight,
   CircleUserRound, Gamepad2, Heart, ImageIcon, LoaderCircle, LogIn,
-  Menu, MessageSquare, PenLine, PlayCircle, Plus, Search, ShieldAlert,
-  Star, X,
+  PenLine, PlayCircle, Plus, ShieldAlert,
+  Star,
 } from "lucide-react";
 import { apiRequest } from "@/lib/api";
 import type { GameDetailModel, GameReview, PageExtra } from "./game-detail-types";
@@ -50,40 +50,6 @@ function RatingStars({ value, size = 15 }: { value: number | null; size?: number
       <Star key={i} size={size} fill={i <= Math.round(value) ? "currentColor" : "none"} />
     ))}
   </span>;
-}
-
-function SiteHeader({ user }: { user: CurrentUser | null }) {
-  const [mobileSearch, setMobileSearch] = useState(false);
-  return <>
-    <header className="gdx-header">
-      <div className="gdx-header-inner">
-        <Link href="/discover" className="gdx-logo" aria-label="GameboxD Discover">
-          <Gamepad2 size={23} /><span>GAMEBOX<strong>D</strong></span>
-        </Link>
-        <nav className="gdx-header-links" aria-label="Main navigation">
-          <Link href="/discover">Discover</Link>
-          <Link href="/following">Following</Link>
-          <Link href="/wishlist">Wishlist</Link>
-          <Link href="/lists">Lists</Link>
-        </nav>
-        <form className="gdx-search" action="/discover" method="get" role="search">
-          <Search size={17}/><input name="q" aria-label="Search games" placeholder="Search games, reviews, lists..." /><kbd>/</kbd>
-        </form>
-        <button className="gdx-header-log" type="button" disabled title="Game logging is coming later"><Plus size={15}/> Log Game</button>
-        <Link className="gdx-user-link" href={user ? `/users/${encodeURIComponent(user.username)}` : "/login"} aria-label={user ? `Profile: ${user.username}` : "Log in"}>
-          <CircleUserRound size={24}/><ChevronDown size={12}/>
-        </Link>
-        <button className="gdx-mobile-toggle" type="button" onClick={() => setMobileSearch((x) => !x)} aria-label="Toggle search">{mobileSearch ? <X size={22}/> : <Menu size={22}/>}</button>
-      </div>
-      {mobileSearch && <form className="gdx-mobile-search" action="/discover" method="get"><input name="q" placeholder="Search games..." autoFocus /><button type="submit" aria-label="Search"><Search size={18}/></button></form>}
-    </header>
-    <nav className="gdx-mobile-nav" aria-label="Mobile navigation">
-      <Link href="/discover"><Gamepad2 size={20}/>Discover</Link>
-      <Link href="/following"><MessageSquare size={20}/>Following</Link>
-      <Link href="/wishlist"><Bookmark size={20}/>Wishlist</Link>
-      <Link href={user ? `/users/${encodeURIComponent(user.username)}` : "/login"}><CircleUserRound size={20}/>Profile</Link>
-    </nav>
-  </>;
 }
 
 function ReviewCard({ review, user, onChange }: {
@@ -201,6 +167,20 @@ export default function GameDetailView({ game }: { game: GameDetailModel }) {
     return collection;
   }, [extra.screenshots, game.backgroundUrl, game.coverUrl]);
   const selectedMedia = media[Math.min(mediaIndex, media.length - 1)] ?? null;
+  const selectedGameArt = game.backgroundUrl ?? game.coverUrl ?? null;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (selectedGameArt) {
+      root.style.setProperty("--gbd-featured-artwork", `url(${JSON.stringify(selectedGameArt)})`);
+    } else {
+      root.style.removeProperty("--gbd-featured-artwork");
+    }
+    return () => {
+      root.style.removeProperty("--gbd-featured-artwork");
+    };
+  }, [selectedGameArt]);
+
   const community = extra.community;
   const maxCount = Math.max(1, ...community.distribution.map((d) => d.count));
 
@@ -304,7 +284,13 @@ export default function GameDetailView({ game }: { game: GameDetailModel }) {
 
   const visibleReviews = reviewRows.filter((r) => !onlySpoilers || r.isSpoiler);
   return <div className="gdx-page">
-    <SiteHeader user={currentUser}/>
+    {(game.backgroundUrl || game.coverUrl) && (
+      <div
+        className="gdx-ambient-backdrop"
+        aria-hidden="true"
+        style={{ backgroundImage: `url(${JSON.stringify(game.backgroundUrl ?? game.coverUrl)})` }}
+      />
+    )}
     <main className="gdx-main">
       <Link href="/discover" className="gdx-back"><ArrowLeft size={15}/> Back to Discover</Link>
       <section className="gdx-hero" aria-label={`${game.name} header`}>

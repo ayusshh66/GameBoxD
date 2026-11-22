@@ -13,18 +13,18 @@ export default function SiteNavigation() {
   if (AUTH_PAGES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return null;
 
   return (
-    <>
-      {/* Stitch brand header; navigation itself is the 21st.dev animated bottom pill. */}
-      <header className="gbd-site-header">
-        <Link href="/home" className="gbd-site-brand" aria-label="GameboxD Home">
-          <span className="gbd-brand-mark"><Gamepad2 size={21} strokeWidth={2.3}/></span>
-          <span>GAMEBOX<span className="gbd-brand-accent">D</span></span>
-        </Link>
-        <Link href="/games" className="gbd-site-search" aria-label="Browse and search games" title="Browse games">
-          <Search size={20}/><span>Explore games</span>
-        </Link>
-      </header>
+    <header className="gbd-site-header">
+      <Link href="/home" className="gbd-site-brand" aria-label="GameboxD Home">
+        <span className="gbd-brand-mark"><Gamepad2 size={21} strokeWidth={2.3}/></span>
+        <span>GAMEBOX<span className="gbd-brand-accent">D</span></span>
+      </Link>
+
+      {/* Same 21st.dev expanding-label pill, now at the top. */}
       <BottomNavBar />
-    </>
+
+      <Link href="/games" className="gbd-site-search" aria-label="Browse and search games" title="Browse games">
+        <Search size={20}/><span>Explore games</span>
+      </Link>
+    </header>
   );
 }

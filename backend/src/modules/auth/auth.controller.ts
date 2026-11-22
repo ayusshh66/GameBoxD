@@ -32,9 +32,22 @@ export const register = async(req: Request, res : Response, next : NextFunction)
             data : newUser,
         })
         
-    } catch (error) {
-        next(error)
     }
+catch (error) {
+  if (
+    error instanceof Error &&
+    error.message === "User Already Exists"
+  ) {
+    return res.status(409).json({
+      success: false,
+      message: "Username or email already registered. Please log in or use different details.",
+    });
+  }
+
+  console.error("Registration error:", error);
+  next(error);
+}
+
 
 }
 
