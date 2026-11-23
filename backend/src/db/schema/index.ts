@@ -3,3 +3,4 @@ export * from "./games";
 export * from "./taxonomy";
 export * from "./reviews";
 export * from "./social";
+export * from "./review-replies";

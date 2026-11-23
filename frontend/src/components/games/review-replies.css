@@ -1,0 +1,19 @@
+/* Review replies: use existing dark surfaces and orange action color. */
+.gbd-replies{margin-top:10px;color:#e6f0ee}
+.gbd-replies-toggle{border:0;background:transparent;color:#fc6b40;display:inline-flex;align-items:center;gap:7px;padding:5px 0;font:inherit;cursor:pointer}
+.gbd-replies-panel{margin-top:8px;border-left:2px solid rgba(252,82,30,.36);padding:8px 0 8px 14px;display:grid;gap:12px}
+.gbd-replies-muted{font-size:13px;color:#91aaa7;margin:0}
+.gbd-replies-muted a{color:#fc6b40}
+.gbd-reply{background:rgba(11,35,35,.5);border-radius:8px;padding:12px;min-width:0}
+.gbd-reply-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.gbd-reply-top a{font-size:13px;font-weight:700;color:#f0f7f6;text-decoration:none}
+.gbd-reply-top span{font-weight:400;color:#90aaa6}
+.gbd-reply-top button{border:0;background:transparent;color:#a6bcb9;cursor:pointer}
+.gbd-reply p{margin:7px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
+.gbd-reply-form{display:grid;gap:8px;max-width:100%}
+.gbd-reply-form label{font-size:13px;color:#a6bcb9}
+.gbd-reply-form textarea{min-height:72px;resize:vertical;border:1px solid #24504b;background:#071f1f;color:#f0f7f6;padding:10px;border-radius:6px;font:inherit}
+.gbd-reply-form textarea:focus-visible{outline:1px solid #fc521e}
+.gbd-reply-form button{justify-self:end;border:0;border-radius:6px;background:#fc521e;color:#061a19;font-weight:700;padding:9px 15px;cursor:pointer}
+.gbd-reply-form button:disabled{opacity:.6;cursor:not-allowed}
+.gbd-replies-error{font-size:13px;color:#ff8a79;margin:0}

@@ -4,20 +4,19 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bell, Bookmark, Compass, Gamepad2, House, LogOut, MessageCircle, Search, Settings, UserRound, UsersRound } from "lucide-react";
+import { Bell, Bookmark, Gamepad2, House, LogOut, MessageCircle, Search, Settings, UserRound, UsersRound } from "lucide-react";
 import "./navigation.css";
 
 const tabs = [
   { label: "Home", href: "/home", icon: House },
-  { label: "Discover", href: "/discover", icon: Compass },
+  { label: "Search", href: "/search", icon: Search },
   { label: "Following", href: "/following", icon: UsersRound },
   { label: "Library", href: "/library", icon: Bookmark },
   { label: "Community", href: "/community", icon: MessageCircle },
 ] as const;
 const hidden = ["/login", "/signup", "/register", "/forgot-password"];
 const currentTab = (path: string, tab: string) => {
-  if (tab === "/home") return path === "/home" || path === "/";
-  if (tab === "/discover") return path === "/discover" || path === "/games" || path.startsWith("/games/") || path.startsWith("/home/shelves/") || path === "/mobile";
+  if (tab === "/home") return path === "/home" || path === "/" || path === "/discover" || path === "/games" || path.startsWith("/games/") || path.startsWith("/home/shelves/") || path === "/mobile";
   if (tab === "/library") return path.startsWith("/library") || path.startsWith("/wishlist");
   return path === tab || path.startsWith(tab + "/");
 };
@@ -71,20 +70,14 @@ export default function SiteNavigation() {
       })}
     </motion.nav>
     <div className="gbd-site-actions">
-      <Link href="/search" className="gbd-action" title="Search games and players" aria-label="Search games and players"><Search size={20}/><span>Search</span></Link>
       <Link href="/notifications" className="gbd-action gbd-icon-action" title="Notifications" aria-label="Notifications"><Bell size={20}/></Link>
       <div className="gbd-avatar-wrap" ref={dropdownRef}>
         <button className="gbd-action gbd-icon-action" aria-label="Account menu" aria-expanded={menu} type="button" onClick={() => void toggleMenu()}><UserRound size={20}/></button>
         <AnimatePresence>{menu && <motion.div className="gbd-avatar-menu" role="menu" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}>
           {checking ? <p>Checking account…</p> : me ? <>
             <strong>@{me.username}</strong>
-<Link
-  role="menuitem"
-  href={`/users/${encodeURIComponent(me.username)}`}
->
-  <UserRound size={16} />
-  My Profile
-</Link>            <Link role="menuitem" href="/settings"><Settings size={16}/>Edit Profile & Settings</Link>
+            <Link role="menuitem" href={`/users/${encodeURIComponent(me.username)}`}><UserRound size={16}/>My Profile</Link>
+            <Link role="menuitem" href="/settings"><Settings size={16}/>Edit Profile & Settings</Link>
             <button role="menuitem" onClick={() => void logout()} type="button"><LogOut size={16}/>Log out</button>
           </> : <><p>You are browsing as a guest.</p><Link role="menuitem" href="/login">Log in</Link><Link role="menuitem" href="/signup">Create account</Link></>}
         </motion.div>}</AnimatePresence>

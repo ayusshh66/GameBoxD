@@ -6,6 +6,7 @@ import authRouter from "./src/modules/auth/auth.routes"
 import gameRouter from "./src/modules/games/games.routes"
 import homeDiscoveryRoutes from "./src/modules/games/home-discovery.routes";
 import feedRoutes from "./src/modules/feed/feed.routes";
+import reviewRepliesRoutes from "./src/modules/review-replies/review-replies.routes";
 import genreRouter from "./src/modules/genres/genres.routes";
 import tagsRouter from "./src/modules/tags/tags.routes";
 import platformRouter from "./src/modules/platforms/platforms.routes";
@@ -49,7 +50,7 @@ app.use("/api/discovery", homeDiscoveryRoutes);
 // General games routes SECOND
 app.use("/api/games", gameRouter);
 app.use("/api/social", socialRoutes);
-
+app.use("/api/reviews", reviewRepliesRoutes);
 app.listen(PORT, () =>{
 
     console.log(`The server is up and running at port ${PORT}`)

@@ -154,3 +154,38 @@ body:has(.gdx-page)::after {
 @media(max-width:820px){.gbd-site-header{min-height:110px;align-items:flex-start;padding:10px 15px}.gbd-site-brand{margin-top:2px}.gbd-site-actions{margin-top:0}.gbd-bottom-nav{top:61px;left:12px;right:12px;transform:none;justify-content:space-evenly;width:auto;padding:3px 5px;min-height:43px}.gbd-nav-item{padding:0 6px;min-height:36px}.gbd-nav-label{font-size:11px}}
 @media(max-width:390px){.gbd-nav-item{padding:0 4px;min-width:30px}.gbd-bottom-nav{left:7px;right:7px}.gbd-nav-label{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.gbd-nav-item{transition:none}}
+
+/* Append to the END of your current navigation.css. Keep your existing artwork gradients. */
+/* Desktop: a slightly shorter, blurred translucent header. */
+.gbd-site-header {
+  height: 66px !important;
+  min-height: 66px !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+  background: rgba(9, 13, 16, 0.32) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(125%) !important;
+  backdrop-filter: blur(18px) saturate(125%) !important;
+}
+.gbd-site-header .gbd-brand-mark { width: 34px; height: 34px; }
+.gbd-site-header .gbd-bottom-nav { min-height: 46px; padding: 4px 7px; }
+.gbd-site-header .gbd-nav-item { min-height: 36px; height: 36px; }
+.gbd-site-header .gbd-icon-action { width: 36px; height: 36px; }
+.gbd-site-header .gbd-site-actions { gap: 7px; }
+
+/* Mobile keeps the existing TWO-ROW navigation, just tighter. */
+@media (max-width: 820px) {
+  .gbd-site-header {
+    height: 100px !important;
+    min-height: 100px !important;
+    padding: 8px 12px 4px !important;
+  }
+  .gbd-site-header .gbd-bottom-nav {
+    top: 51px;
+    min-height: 41px;
+    padding: 3px 5px;
+  }
+  .gbd-site-header .gbd-nav-item { height: 34px; min-height: 34px; }
+  .gbd-site-header .gbd-brand-mark { width: 31px; height: 31px; }
+  .gbd-site-header .gbd-icon-action { width: 32px; height: 32px; }
+}

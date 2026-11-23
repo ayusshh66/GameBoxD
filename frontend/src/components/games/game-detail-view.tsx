@@ -12,6 +12,7 @@ import {
 import { apiRequest } from "@/lib/api";
 import type { GameDetailModel, GameReview, PageExtra } from "./game-detail-types";
 import "./game-detail.css";
+import ReviewReplies from "./review-replies";
 
 type CurrentUser = { id: string; username: string };
 type LibraryResult = { games: Array<{ gameId: string }> };
@@ -127,6 +128,7 @@ function ReviewCard({ review, user, onChange }: {
       </button>
       {review.isSpoiler && spoilersVisible && <button className="gdx-text-action" type="button" onClick={() => setSpoilersVisible(false)}>Hide spoilers</button>}
     </div>
+    <ReviewReplies reviewId={review.id} currentUserId={user?.id} />
     {error && <p className="gdx-inline-error" role="alert">{error}</p>}
   </article>;
 }
