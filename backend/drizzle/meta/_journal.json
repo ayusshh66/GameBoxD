@@ -15,6 +15,13 @@
       "when": 1792393582443,
       "tag": "0001_classy_dakota_north",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795442167566,
+      "tag": "0002_eminent_the_anarchist",
+      "breakpoints": true
     }
   ]
 }

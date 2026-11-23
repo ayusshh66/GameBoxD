@@ -78,8 +78,13 @@ export default function SiteNavigation() {
         <AnimatePresence>{menu && <motion.div className="gbd-avatar-menu" role="menu" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}>
           {checking ? <p>Checking account…</p> : me ? <>
             <strong>@{me.username}</strong>
-            <Link role="menuitem" href={`/users/${encodeURIComponent(me.username)}`}><UserRound size={16}/>My Profile</Link>
-            <Link role="menuitem" href="/settings"><Settings size={16}/>Edit Profile & Settings</Link>
+<Link
+  role="menuitem"
+  href={`/users/${encodeURIComponent(me.username)}`}
+>
+  <UserRound size={16} />
+  My Profile
+</Link>            <Link role="menuitem" href="/settings"><Settings size={16}/>Edit Profile & Settings</Link>
             <button role="menuitem" onClick={() => void logout()} type="button"><LogOut size={16}/>Log out</button>
           </> : <><p>You are browsing as a guest.</p><Link role="menuitem" href="/login">Log in</Link><Link role="menuitem" href="/signup">Create account</Link></>}
         </motion.div>}</AnimatePresence>

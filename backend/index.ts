@@ -1,6 +1,7 @@
-import express, {Request, Response} from "express";
+import express, {Request, Response,NextFunction} from "express";
 import cookieParse from "cookie-parser";
 import cors from 'cors'
+import socialRoutes from "./src/modules/social/social.routes";
 import authRouter from "./src/modules/auth/auth.routes"
 import gameRouter from "./src/modules/games/games.routes"
 import homeDiscoveryRoutes from "./src/modules/games/home-discovery.routes";
@@ -47,9 +48,33 @@ app.use("/api/reviews", reviewLikesRoutes);
 app.use("/api/discovery", homeDiscoveryRoutes);
 // General games routes SECOND
 app.use("/api/games", gameRouter);
+app.use("/api/social", socialRoutes);
 
 app.listen(PORT, () =>{
 
     console.log(`The server is up and running at port ${PORT}`)
 
 })
+
+
+// Place this AFTER all app.use("/api/...", ...) routes.
+app.use(
+  (
+    err: unknown,
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ) => {
+    console.error("API error:", req.method, req.path);
+    console.error(err);
+
+    if (err instanceof Error && "cause" in err) {
+      console.error("DATABASE CAUSE:", err.cause);
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+);
