@@ -33,3 +33,14 @@
 .gbs-home::after, .gbs-ambient-backdrop { display: none !important; }
 .gbs-home-main, .gbs-footer { position: relative; z-index: 1; }
 /* Keep the featured image crisp; only the ambient backdrop is blurred. */
+
+/* Featured carousel v4: gradient derived from whichever game is on screen. */
+.gbs-home { isolation:isolate; background:transparent !important; }
+.gbs-live-backdrop { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; background:#101214; }
+.gbs-live-backdrop-image { position:absolute; inset:-21%; background-position:center 30%; background-size:cover; background-repeat:no-repeat; filter:blur(95px) saturate(1.8) brightness(.81); transform:scale(1.1); will-change:opacity; }
+.gbs-live-backdrop-shade { position:absolute; inset:0; background:linear-gradient(180deg,rgba(8,10,13,.18),rgba(8,10,13,.54) 52%,rgba(6,10,12,.92)); }
+.gbs-home-main,.gbs-footer { position:relative; z-index:1; }
+.gbs-ambient-backdrop { display:none !important; }
+@media(max-width:760px) { .gbs-live-backdrop-image{inset:-15% -35%;filter:blur(68px) saturate(1.75) brightness(.77)} }
+
+.gbs-views { font-size:10px; color:#ff926c; white-space:nowrap; }

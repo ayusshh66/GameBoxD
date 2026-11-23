@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import GameboxdHeroCarousel from "./gameboxd-hero-carousel";
 import Link from "next/link";
 import {
   ArrowRight, BookmarkPlus, ChevronLeft, ChevronRight, Gamepad2,
-  Heart, Pause, Play, Star, Volume2, VolumeX,
+  Heart, Star,
 } from "lucide-react";
 import type { GameboxdHomePayload, GameShelf, HomeGame } from "@/lib/home-data";
 import "./gameboxd-home.css";
@@ -46,50 +48,6 @@ function RatingTag({ game }: { game: HomeGame }) {
   ) : null;
 }
 
-function CinematicHero({ game, videoUrl }: { game: HomeGame; videoUrl: string | null }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [paused, setPaused] = useState(false);
-  const [muted, setMuted] = useState(true);
-  useEffect(() => {
-    if (videoRef.current && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      videoRef.current.pause();
-      setPaused(true);
-    }
-  }, []);
-  const togglePlayback = () => {
-    const el = videoRef.current;
-    if (!el) return;
-    if (el.paused) void el.play().then(() => setPaused(false)).catch(() => setPaused(true));
-    else { el.pause(); setPaused(true); }
-  };
-  return (
-    <section className="gbs-hero" aria-labelledby="gbs-featured-title">
-      <div className="gbs-hero-image" style={{ backgroundImage: game.backgroundUrl ? `url("${game.backgroundUrl}")` : undefined }} />
-      {videoUrl ? (
-        <video ref={videoRef} className="gbs-hero-video" src={videoUrl} poster={game.backgroundUrl ?? undefined} autoPlay muted={muted} loop playsInline preload="none" />
-      ) : null}
-      <div className="gbs-hero-overlay" />
-      <div className="gbs-hero-badge"><span className="gbs-live-dot"/> Featured Game</div>
-      {videoUrl && (
-        <div className="gbs-hero-media-controls">
-          <button type="button" onClick={togglePlayback} aria-label={paused ? "Play trailer" : "Pause trailer"}>{paused ? <Play size={17}/> : <Pause size={17}/>}</button>
-          <button type="button" onClick={() => setMuted(x => !x)} aria-label={muted ? "Unmute trailer" : "Mute trailer"}>{muted ? <VolumeX size={17}/> : <Volume2 size={17}/>}</button>
-        </div>
-      )}
-      <div className="gbs-hero-copy">
-        <div className="gbs-hero-kicker"><span>SPOTLIGHT</span> {game.genre && <span>{game.genre}</span>} {game.released && <span>{game.released.slice(0,4)}</span>}</div>
-        <h1 id="gbs-featured-title">{game.name}</h1>
-        <div className="gbs-hero-rating"><RatingTag game={game}/></div>
-        <p>Explore the story, community reviews, ratings and screenshots on GameboxD.</p>
-        <div className="gbs-hero-actions">
-          <Link href={game.href} className="gbs-cta"><Gamepad2 size={17}/> Game Details <ArrowRight size={17}/></Link>
-          <Link href="/games" className="gbs-cta-secondary">Explore games</Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function RankedTen({ games }: { games: HomeGame[] }) {
   const scroller = useRef<HTMLDivElement>(null);
   if (!games.length) return null;
@@ -123,7 +81,7 @@ function Shelf({ shelf, style = "poster" }: { shelf: GameShelf; style?: RailStyl
       <div className="gbs-section-heading">
         <div><div className="gbs-heading-line"><span className="gbs-heading-dot"/><h2 id={`shelf-${shelf.key}`}>{config?.title ?? shelf.title}</h2></div>{(config?.eyebrow ?? shelf.subtitle) && <p>{config?.eyebrow ?? shelf.subtitle}</p>}</div>
         <div className="gbs-heading-actions">
-          {shelf.key === "community" ? <Link href="/following" className="gbs-view-all">Following Feed <ArrowRight size={13}/></Link> : <Link href={`/home/shelves/${encodeURIComponent(shelf.key)}`} className="gbs-view-all">See all <ArrowRight size={13}/></Link>}
+          {shelf.key === "trending-gameboxd" ? <span className="gbs-view-all">Today on GameboxD</span> : shelf.key === "community" ? <Link href="/following" className="gbs-view-all">Following Feed <ArrowRight size={13}/></Link> : <Link href={`/home/shelves/${encodeURIComponent(shelf.key)}`} className="gbs-view-all">See all <ArrowRight size={13}/></Link>}
           <button onClick={() => shift(-1)} aria-label={`Scroll ${shelf.title} left`}><ChevronLeft size={18}/></button>
           <button onClick={() => shift(1)} aria-label={`Scroll ${shelf.title} right`}><ChevronRight size={18}/></button>
         </div>
@@ -136,12 +94,29 @@ function Shelf({ shelf, style = "poster" }: { shelf: GameShelf; style?: RailStyl
               {style === "recent" && <span className="gbs-new-chip">NEW</span>}
               <div className="gbs-poster-hover">View Game <ArrowRight size={15}/></div>
             </div>
-            <div className="gbs-card-meta"><span className="gbs-card-name">{game.name}</span><RatingTag game={game}/></div>
+            <div className="gbs-card-meta"><span className="gbs-card-name">{game.name}</span>{shelf.key === "trending-gameboxd" && game.todayViews !== undefined ? <span className="gbs-views">{game.todayViews} views today</span> : <RatingTag game={game}/>}</div>
             {style === "landscape" ? <p className="gbs-card-genre">{game.genre ?? "Discover this game"}</p> : null}
           </Link>
         ))}
       </div>
     </section>
+  );
+}
+
+function TrendingGameboxd({ games }: { games: HomeGame[] }) {
+  if (!games.length) return null;
+  return (
+    <Shelf
+      shelf={{
+        key: "trending-gameboxd",
+        title: "Trending on GameboxD",
+        subtitle: "Games viewed by GameboxD players today · unique signed-in views",
+        games,
+        page: 1,
+        hasMore: false,
+      }}
+      style="landscape"
+    />
   );
 }
 
@@ -155,41 +130,78 @@ function CtaBanner() {
   </section>;
 }
 
+/** A carousel assembled from actual RAWG/Neon game records. No hardcoded games. */
+function buildFeaturedGames(data: GameboxdHomePayload | null, mode: Mode): HomeGame[] {
+  if (!data) return [];
+  const items = mode === "mobile"
+    ? [
+        ...data.shelves.filter(s => s.key === "mobile").flatMap(s => s.games),
+        ...(data.topTen ?? []),
+      ]
+    : [
+        ...(data.trending ?? []),
+        ...(data.hero ? [data.hero] : []),
+        ...(data.topTen ?? []),
+        ...data.shelves.filter(s => s.key === "recent" || s.key === "action" || s.key === "rpg").flatMap(s => s.games),
+      ];
+  const seen = new Set<string>();
+  return items.filter(game => {
+    const key = game.name.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!game.name || !(game.backgroundUrl || game.imageUrl) || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 8);
+}
+
 export default function GameboxdHome({ data, error, mode = "all" }: { data: GameboxdHomePayload | null; error: string | null; mode?: Mode }) {
   const shelves = (data?.shelves ?? []).slice().sort((a,b) => genresOrder.indexOf(a.key) - genresOrder.indexOf(b.key));
   const filtered = mode === "mobile" ? shelves.filter(s => s.key === "mobile") : shelves;
-  const hero = mode === "mobile" ? filtered[0]?.games[0] ?? null : data?.hero ?? null;
+  const featuredGames = useMemo(() => buildFeaturedGames(data, mode), [data, mode]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const hero = featuredGames.length ? featuredGames[activeIndex % featuredGames.length] : null;
   const featuredArt = hero?.backgroundUrl ?? hero?.imageUrl ?? null;
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const root = document.documentElement;
     if (featuredArt) {
-      // Drive the *entire page*, including the transparent navbar, from this game.
+      // Existing glass navbar and page theme already read this CSS variable.
       root.style.setProperty("--gbd-featured-artwork", `url(${JSON.stringify(featuredArt)})`);
     } else {
       root.style.removeProperty("--gbd-featured-artwork");
     }
-    return () => {
-      root.style.removeProperty("--gbd-featured-artwork");
-    };
+    return () => { root.style.removeProperty("--gbd-featured-artwork"); };
   }, [featuredArt]);
 
   return (
     <div className="gbs-home">
-      {hero && (hero.backgroundUrl || hero.imageUrl) && (
-        <div
-          className="gbs-ambient-backdrop"
-          aria-hidden="true"
-          style={{ backgroundImage: `url(${JSON.stringify(hero.backgroundUrl ?? hero.imageUrl)})` }}
-        />
-      )}
+      {/* Crossfading, image-derived ambient gradient that changes with every slide. */}
+      <div className="gbs-live-backdrop" aria-hidden="true">
+        <AnimatePresence initial={false}>
+          {featuredArt && (
+            <motion.div
+              key={featuredArt}
+              className="gbs-live-backdrop-image"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.82 }}
+              exit={{ opacity: 0 }}
+              transition={reducedMotion ? { duration: 0 } : { duration: 1.2 }}
+              style={{ backgroundImage: `url(${JSON.stringify(featuredArt)})` }}
+            />
+          )}
+        </AnimatePresence>
+        <div className="gbs-live-backdrop-shade" />
+      </div>
       <main className="gbs-home-main">
         {mode === "mobile" && <div className="gbs-page-title"><span>Browse by platform</span><h1>Mobile games</h1></div>}
         {error && <div className="gbs-load-error" role="alert">{error} Check the response from <code>/api/discovery/home</code>.</div>}
-        {hero && <CinematicHero game={hero} videoUrl={mode === "all" ? data?.heroVideoUrl ?? null : null}/>}
+        {featuredGames.length > 0 && (
+          <GameboxdHeroCarousel games={featuredGames} activeIndex={activeIndex} onActiveIndexChange={setActiveIndex} />
+        )}
+        {mode === "all" && data?.trending?.length ? <TrendingGameboxd games={data.trending}/> : null}
         {mode === "all" && data?.topTen?.length ? <RankedTen games={data.topTen}/> : null}
         {filtered.map(s => <Shelf key={s.key} shelf={s} style={s.key === "recent" ? "recent" : s.key === "community" || s.key === "action" || s.key === "open-world" ? "landscape" : s.key === "mobile" ? "compact" : "poster"}/>)}
-        {!error && !hero && filtered.length === 0 && <div className="gbs-no-games">No games are available to display yet. Try again when the catalogue API responds.</div>}
+        {!error && featuredGames.length === 0 && filtered.length === 0 && <div className="gbs-no-games">No games are available to display yet. Try again when the catalogue API responds.</div>}
         {mode === "all" && <CtaBanner/>}
         {data?.unavailableSections?.length ? <p className="gbs-partial-warning">Some shelves could not load ({data.unavailableSections.join(", ")}). Other sections are still available.</p> : null}
       </main>
