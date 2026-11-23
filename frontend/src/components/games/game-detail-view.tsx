@@ -141,6 +141,7 @@ export default function GameDetailView({ game }: { game: GameDetailModel }) {
   const [expanded, setExpanded] = useState(false);
   const [mediaIndex, setMediaIndex] = useState(0);
   const [rating, setRating] = useState<number>(0);
+  const [gameLogStatus, setGameLogStatus] = useState<"playing" | "completed" | "paused" | "dropped" | "played">("playing");
   const [reviewContent, setReviewContent] = useState("");
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [reviewRows, setReviewRows] = useState<GameReview[]>([]);
@@ -392,8 +393,13 @@ export default function GameDetailView({ game }: { game: GameDetailModel }) {
               await apiRequest(`/api/games/${id}/favorite`, { method: favoriteSaved ? "DELETE" : "POST" });
               setFavoriteSaved((v) => !v);
             })}><Heart size={17} fill={favoriteSaved ? "currentColor" : "none"}/>{favoriteSaved ? "Remove from Favorites" : "Add to Favorites"}{favoriteSaved && <Check size={14} className="gdx-green"/>}</button>
-            <button type="button" className="gdx-dark-action gdx-coming-soon" disabled><Plus size={16}/> Log Game <small>Coming Soon</small></button>
-            <p className="gdx-info-note"><ShieldAlert size={14}/> Game logging is not implemented yet. Reviews, ratings and saves work through GameboxD.</p>
+            <div className="gdx-log-row" style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
+              <select aria-label="Game progress status" value={gameLogStatus} onChange={e=>setGameLogStatus(e.target.value as typeof gameLogStatus)} style={{background:"#102a29",color:"#f0f7f6",border:"1px solid #274642",borderRadius:7,padding:"10px 12px",flex:1}}>
+                <option value="playing">Playing</option><option value="completed">Completed</option><option value="paused">Paused</option><option value="dropped">Dropped</option><option value="played">Played</option>
+              </select>
+              <button type="button" className="gdx-dark-action" style={{flex:1}} disabled={!!busy} onClick={() => perform("Game Log", async(id) => { await apiRequest(`/api/social/logs/${id}`, { method:"PUT", body:{status:gameLogStatus} }); })}><Plus size={16}/> Log Game</button>
+            </div>
+            <p className="gdx-info-note"><ShieldAlert size={14}/> Your progress is separate from ratings, reviews, Favorites and Wishlist. Find it in My Library.</p>
             {!currentUser && authReady && <Link href="/login" className="gdx-login-notice"><LogIn size={15}/> Sign in to interact with this game</Link>}
             {busy && <p className="gdx-feedback"><LoaderCircle className="gdx-spin" size={14}/> {busy} in progress…</p>}
             {feedback && <p className="gdx-feedback" role="status"><Check size={15}/> {feedback}</p>}
