@@ -1,0 +1,25 @@
+/* Additive styling: does not replace your existing navigation or gradient. */
+.gbd-notification-action {
+  position: relative;
+  overflow: visible;
+}
+.gbd-site-header .gbd-notification-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  z-index: 2;
+  display: grid !important; /* Existing mobile .gbd-action span rule hides spans. */
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border-radius: 999px;
+  border: 2px solid #0e1516;
+  background: #fc521e;
+  color: #081310;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
