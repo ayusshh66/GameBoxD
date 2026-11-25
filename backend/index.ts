@@ -57,8 +57,6 @@ app.listen(PORT, () =>{
 
 })
 
-
-// Place this AFTER all app.use("/api/...", ...) routes.
 app.use(
   (
     err: unknown,
