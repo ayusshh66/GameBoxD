@@ -239,3 +239,15 @@ We are working inside a transaction:
 
 ```ts
 await
+
+// code reusable frontend api integration
+
+Syntax	  ----------  Meaning
+export	 ------------------ Other files can import the function
+async	 ---------------- The function returns a promise
+<T>	--------------------- Generic representing the response data type
+path:    ----------------- string	API endpoint
+options: ApiOptions = ------------ {}	Optional configuration with an empty object as default
+Promise<ApiResponse<T>>	 ---------------------- Expected resolved response type
+
+![alt text](image-1.png)
