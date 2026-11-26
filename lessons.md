@@ -251,3 +251,30 @@ options: ApiOptions = ------------ {}	Optional configuration with an empty objec
 Promise<ApiResponse<T>>	 ---------------------- Expected resolved response type
 
 ![alt text](image-1.png)
+
+#include
+When the frontend makes subsequent API requests, credentials: "include" allows the browser to include eligible cookies, including in cross-origin requests.
+
+#no cache 
+
+8. Understanding cache: "no-store"
+cache: "no-store",
+
+
+This tells the fetch implementation not to reuse or store the response through its normal HTTP cache.
+
+Consider this situation:
+
+You have three unread notifications. You open the notification page and mark all of them as read. Now you fetch the notifications again.
+
+You want the updated unread count of zero, not a previously cached response containing three.
+
+Is this the same as Redis caching? No.
+Fetch caching	Redis caching
+Client/framework-level behavior	Backend-level caching
+Controlled by fetch options	Controlled by your backend code
+Caches HTTP responses	Can cache database results and other data
+cache: "no-store"	redis.set(), redis.get(), redis.del()
+
+Even with cache: "no-store", your backend can still retrieve information from Redis.
+
